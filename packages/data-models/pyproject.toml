@@ -1,0 +1,50 @@
+[project]
+name = "data-models"
+version = "0.1.0"
+description = "AI Models"
+readme = "README.md"
+requires-python = "~=3.11.0"
+dependencies = [
+    "pydantic>=2.11",
+]
+
+[tool.uv.sources]
+
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "taskipy>=1.14.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["A", "B", "C", "E", "F", "W", "I", "UP", "FURB", "RUF", "PD"]
+exclude = [".venv"]
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[tool.taskipy.tasks]
+precommit = { cmd = "uvx ruff check . && uvx ruff format . && uvx pyright .", help = "Run lint, format, and typecheck" }

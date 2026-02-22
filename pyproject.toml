@@ -1,0 +1,64 @@
+[project]
+name = "claude-templates"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+#    "lib",
+]
+
+[tool.uv.sources]
+#lib = { path = "../packages/lib", editable = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-env>=1.1.5",
+    "taskipy>=1.14.0",
+]
+
+[project.optional-dependencies]
+
+[project.scripts]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["packages/**"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["A", "B", "C", "E", "F", "W", "I", "UP", "FURB", "RUF", "PD"]
+exclude = [".venv"]
+ignore = ["E501", "C901",]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.taskipy.tasks]
+precommit = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright .", help = "Lint, format and typecheck Python codebase" }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

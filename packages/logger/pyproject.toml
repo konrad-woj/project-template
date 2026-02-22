@@ -1,0 +1,59 @@
+[project]
+name = "logger"
+version = "0.1.0"
+description = "Universal structured logging to be used across all Hermes services"
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+    "structlog>=24.4.0",
+    "pydantic>=2",
+]
+
+[dependency-groups]
+dev = [
+    "better-exceptions>=0.3.3",
+    "pytest>=8.3.4",
+    "rich>=13.9.4",
+    "taskipy>=1.14.1",
+]
+
+[project.optional-dependencies]
+
+[project.scripts]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["A", "B", "C", "E", "F", "W", "I", "UP", "FURB", "RUF", "PD"]
+exclude = [".venv"]
+ignore = ["E501", "C901",]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.taskipy.tasks]
+precommit = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright .", help = "Lint, format and typecheck Python codebase" }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

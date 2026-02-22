@@ -1,0 +1,91 @@
+[project]
+name = "data-utils"
+version = "0.2.0"
+description = "AI Data Utilities"
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+    "aiofiles",
+    "boto3>=1.39.0",
+    "botocore>=1.39.0",
+    "data-models",
+    "omegaconf",
+    "pandas>=2.2.3",
+    "pillow>=11.0.0",
+    "s3path==0.6.0",
+    "structlog",
+    "tqdm",
+    "types-boto3[textract]>=1.37.14",
+]
+
+[tool.uv.sources]
+data-models = { path = "../data-models", editable = true }
+
+[dependency-groups]
+dev = [
+    "taskipy>=1.14.0",
+    "pytest>=8.3.3",
+    "pymupdf>=1.26.3",
+    "pypdfium2>=3.0.0",
+    "opencv-python-headless<4.12.0.88",
+    "starlette",
+    "psycopg2-binary",
+    "matplotlib",  # For viewing rotations locally.
+]
+
+[project.optional-dependencies]
+cv2 = [
+    "opencv-python-headless<4.12.0.88",
+]
+pymupdf = [
+    "pymupdf>=1.26.3",
+]
+pypdfium2 = [
+    "pypdfium2>=3.0.0",
+]
+xlsx = [
+    "python-calamine>=0.4.0",
+    "pyxlsb>=1.0.0",  # For XLSB file support
+]
+rds = [
+    "psycopg2-binary",
+]
+
+[project.scripts]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["A", "B", "C", "E", "F", "W", "I", "UP", "FURB", "RUF", "PD"]
+exclude = [".venv"]
+ignore = ["E501", "C901",]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.taskipy.tasks]
+precommit = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright .", help = "Lint, format and typecheck Python codebase" }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
