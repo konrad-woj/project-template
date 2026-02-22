@@ -1,7 +1,6 @@
 import math
 
 from data_models.ocr_models.textract import TextractBlockModel
-
 from data_utils.ocr.ocr_derotation import OcrDerotation
 
 from .conftest import make_simple_block, rotate_block_page

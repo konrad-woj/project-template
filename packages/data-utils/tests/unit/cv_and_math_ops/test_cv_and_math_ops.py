@@ -4,8 +4,6 @@ from pathlib import Path
 import pytest
 from data_models.geometry_models.object_detection import BoundingBox
 from data_models.geometry_models.primitives import Point
-from PIL import Image
-
 from data_utils.cv_and_math_ops import (
     calculate_angle,
     calculate_human_readable_angle,
@@ -13,6 +11,7 @@ from data_utils.cv_and_math_ops import (
     compute_iou,
     resize_img_keep_ratio,
 )
+from PIL import Image
 
 
 @pytest.mark.parametrize(

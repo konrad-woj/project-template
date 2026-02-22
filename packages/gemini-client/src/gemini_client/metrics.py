@@ -191,7 +191,7 @@ class MetricsTrackingWrapper:
             self.metrics._record_request_end()
 
 
-def with_metrics(client: T) -> T:
+def with_metrics[T](client: T) -> T:
     """Wrap an LLM client with metrics tracking.
 
     Args:

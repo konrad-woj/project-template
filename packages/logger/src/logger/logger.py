@@ -175,6 +175,12 @@ def replace_bytes_in_event_dict(
     return {k: _replace(v) for k, v in event_dict.items()}
 
 
+def _build_shared_processors() -> list:
+    """Build the shared processor list used by both structlog and ProcessorFormatter."""
+    timestamper = structlog.processors.TimeStamper(fmt="iso")
+    return [merge_contextvars, structlog.stdlib.add_log_level, timestamper, replace_bytes_in_event_dict]
+
+
 def create_formatter(is_dev: bool = False) -> structlog.stdlib.ProcessorFormatter:
     """Creates a formatter for structured logging.
 
@@ -185,14 +191,7 @@ def create_formatter(is_dev: bool = False) -> structlog.stdlib.ProcessorFormatte
         structlog.stdlib.ProcessorFormatter: Configured formatter for structlog integration.
     """
 
-    timestamper = structlog.processors.TimeStamper(fmt="iso")
-    shared_processors = [merge_contextvars, structlog.stdlib.add_log_level, timestamper, replace_bytes_in_event_dict]
-
-    structlog.configure(
-        processors=[*shared_processors, structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        cache_logger_on_first_use=True,
-    )
+    shared_processors = _build_shared_processors()
 
     console_renderer = [structlog.dev.ConsoleRenderer()]
     json_renderer = [
@@ -292,6 +291,14 @@ def configure_logger(
     Returns:
         None
     """
+
+    # Configure structlog once here, not inside create_formatter which may be called multiple times.
+    shared_processors = _build_shared_processors()
+    structlog.configure(
+        processors=[*shared_processors, structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
 
     # Clear existing handlers to prevent duplicate logs.
     root_logger = logging.getLogger()

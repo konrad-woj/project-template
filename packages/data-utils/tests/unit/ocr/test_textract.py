@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from data_models.ocr_models.textract import TextractResultModel
-
 from data_utils.cv_and_math_ops import calculate_angle, calculate_human_readable_angle
 from data_utils.ocr.textract import TextractParser
 

@@ -64,8 +64,8 @@ Usage Examples
     )
 
     print(response["text"])             # Final answer
-    print(response["thinking_tokens"])  # Tokens used for internal reasoning
-    print(response["thinking_cost"])    # Cost of thinking tokens
+    print(response["thought_tokens"])   # Tokens used for internal reasoning
+    print(response["thinking_cost"])    # Cost of thinking tokens (in cost_metadata)
 
 
 4. Async Usage with Images
@@ -471,7 +471,7 @@ class GeminiLLM(BaseLLMClient):
                 sleep_time = _calculate_sleep_time(retry)
                 logger.info("Retrying request", sleep_time=sleep_time, retry=retry + 1)
                 time.sleep(sleep_time)
-            except (httpx.HTTPError, asyncio.exceptions.TimeoutError):
+            except httpx.HTTPError:
                 if retry == self.num_retries - 1:
                     raise
                 sleep_time = _calculate_sleep_time(retry)

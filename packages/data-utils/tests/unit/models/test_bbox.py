@@ -1,6 +1,5 @@
 import pytest
 from data_models.geometry_models.object_detection import BoundingBox
-
 from data_utils.cv_and_math_ops import compute_iou
 
 

@@ -14,7 +14,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-for dir in ./*/; do
+for dir in ./packages/*/; do
   if [ -d "$dir" ]; then
     echo "Running '$1' in $dir"
     if [ "$BREAK_ON_ERROR" -eq 1 ]; then

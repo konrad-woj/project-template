@@ -2,9 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from botocore.exceptions import ClientError
-from omegaconf import OmegaConf
-
 from data_utils.ocr.ocr_fetcher import S3OcrFetcher
+from omegaconf import OmegaConf
 
 
 @pytest.fixture

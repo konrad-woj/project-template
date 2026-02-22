@@ -1,5 +1,4 @@
 import pytest
-
 from data_utils.ocr.ocr_clustering import OcrTextClustering
 
 from .conftest import make_simple_block, rotate_block_page

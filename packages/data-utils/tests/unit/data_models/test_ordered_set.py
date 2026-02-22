@@ -1,5 +1,4 @@
 import pytest
-
 from data_utils.data_structures import OrderedSet
 
 

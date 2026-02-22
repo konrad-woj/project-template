@@ -13,23 +13,10 @@ from typing import TypeVar, cast
 
 import structlog
 
+from logger._utils import _get_log_method
+
 # Preserve exact function/method signature through decorator
 F = TypeVar("F", bound=Callable)
-
-
-def _get_log_method(logger: structlog.BoundLogger, level: str) -> Callable:
-    """Get the appropriate log method based on level string."""
-    level_lower = level.lower()
-    if level_lower == "debug":
-        return logger.debug
-    elif level_lower == "info":
-        return logger.info
-    elif level_lower == "warning":
-        return logger.warning
-    elif level_lower == "error":
-        return logger.error
-    else:
-        return logger.info  # Default fallback
 
 
 def timer(func=None, *, level: str = "INFO"):
@@ -63,7 +50,7 @@ def timer(func=None, *, level: str = "INFO"):
 
             # Environment variable takes precedence
             env_level = os.getenv("TIMER_LOG_LEVEL")
-            effective_level = env_level if env_level else level
+            effective_level = env_level or level
             log_method = _get_log_method(logger, effective_level)
 
             log_method("[START]", **log_ctx)
