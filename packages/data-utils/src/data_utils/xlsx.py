@@ -23,31 +23,19 @@ def excel_to_dict(
 
     # Select engine based on file type
     if file_extension == ".xlsb":
-        # For XLSB files, try multiple engines for maximum compatibility
-        engines_to_try = [None, "openpyxl", "pyxlsb"]  # None lets pandas choose automatically
-
-        for engine in engines_to_try:
+        # Try engines in order until one works; None lets pandas auto-select.
+        last_error: Exception | None = None
+        for engine in (None, "openpyxl", "pyxlsb"):
             try:
-                if engine is None:
-                    df = pd.read_excel(io=io, sheet_name=sheet_name, usecols=usecols, **kwargs)
-                else:
-                    df = pd.read_excel(io=io, sheet_name=sheet_name, usecols=usecols, engine=engine, **kwargs)
-                break  # Success, exit the loop
-            except ImportError:
-                # Engine not available, try next one
-                continue
-            except Exception as e:
-                # Other error with this engine, try next one
-                if engine == engines_to_try[-1]:  # Last engine in list
-                    raise e  # Re-raise the error if all engines failed
-                continue
+                engine_kwarg = {} if engine is None else {"engine": engine}
+                df = pd.read_excel(io=io, sheet_name=sheet_name, usecols=usecols, **engine_kwarg, **kwargs)
+                break
+            except (ImportError, Exception) as e:
+                last_error = e
         else:
-            # All engines failed
-            raise RuntimeError(f"Could not read XLSB file {io} with any available engine")
+            raise last_error or RuntimeError(f"Could not read XLSB file {io} with any available engine")
     else:
         # For other Excel files, use calamine for better performance
         df = pd.read_excel(io=io, sheet_name=sheet_name, usecols=usecols, engine="calamine", **kwargs)
 
-    if usecols:
-        df = df[usecols]
     return df.to_dict(orient=orient)  # type: ignore[call-arg]

@@ -1,13 +1,17 @@
+from os import PathLike
+from pathlib import Path
 from typing import overload
 
 import structlog
 from PIL import Image
 from pypdfium2 import PdfDocument, PdfPage
 
+from data_utils.io import ImageTooLargeError
+
 logger = structlog.get_logger()
 
 
-def load_pdf_from_disk(pdf_path):
+def load_pdf_from_disk(pdf_path: str | Path | PathLike[str]) -> PdfDocument:
     """Loads pdf from file and returns it as object."""
     return PdfDocument(pdf_path)
 
@@ -29,12 +33,7 @@ def pdf_to_images(
 ) -> list[Image.Image] | Image.Image:
     if page_id is not None:
         return pdf_page_to_image(pdf, page_id, dpi, pixel_threshold)
-    else:
-        images = []
-        for page_id in range(len(pdf)):
-            image = pdf_page_to_image(pdf, page_id, dpi, pixel_threshold)
-            images.append(image)
-        return images
+    return [pdf_page_to_image(pdf, i, dpi, pixel_threshold) for i in range(len(pdf))]
 
 
 def pdf_page_to_image(
@@ -44,7 +43,7 @@ def pdf_page_to_image(
     if pixel_threshold and pixel_threshold > 0:
         logger.info("Checking page size...", page_id=page_id, pixel_threshold=pixel_threshold)
         if is_page_pixels_too_large(page, pixel_threshold, dpi):
-            raise Exception(f"Page {page_id} exceeds pixel threshold of {pixel_threshold}")
+            raise ImageTooLargeError(f"Page {page_id} exceeds pixel threshold of {pixel_threshold}")
     image = page.render(scale=int(dpi / 72)).to_pil()
     return image
 

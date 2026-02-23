@@ -43,7 +43,7 @@ class DocumentReader:
 
         return True
 
-    def get_image_from_file(self, filepath: Path | str, page_id: int = 0):
+    def get_image_from_file(self, filepath: Path | str, page_id: int = 0) -> Image.Image:
         """Reads document file and returns resized/validated image."""
         filepath = Path(filepath)
 
@@ -62,7 +62,7 @@ class DocumentReader:
         return self.get_image_from_document(pdf, page_id)
 
     def get_image_from_document(self, document: Document | Image.Image, page_id: int = 0) -> Image.Image:
-        """Loads PDF page as Image. If too large it will reduce the DPI."""
+        """Returns a validated, DPI-scaled image from a PDF Document or PIL Image. Reduces DPI if too large."""
         dpi = self.base_dpi
         if self.raise_on_pixel_threshold:
             image = document_to_image(document, page_id=page_id, dpi=dpi, pixel_threshold=self.pixel_threshold)
@@ -75,11 +75,11 @@ class DocumentReader:
 
             if self.is_image_size_ok(image):
                 if dpi != self.base_dpi:
-                    logger.info(f"Resized image at dpi {dpi}", size=image.size)
+                    logger.info("Resized image.", dpi=dpi, size=image.size)
                 return image
 
             # Reduce DPI and try again
             dpi = int(dpi * 0.75)
-            logger.info(f"Page too large. Dropping dpi to {dpi}", page_id=page_id)
+            logger.info("Page too large, dropping DPI.", dpi=dpi, page_id=page_id)
 
         raise RuntimeError(f"Failed to extract image for page id={page_id}: minimum DPI reached")

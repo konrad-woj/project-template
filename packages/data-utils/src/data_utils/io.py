@@ -1,7 +1,7 @@
 from io import BytesIO
 from os import PathLike
 from pathlib import Path
-from typing import IO
+from typing import IO, overload
 
 import structlog
 from PIL import Image, UnidentifiedImageError
@@ -41,7 +41,7 @@ def open_image(
         return image
     except UnidentifiedImageError as e:
         logger.error("Failed to open image", image_path=fp, error=str(e))
-        raise e
+        raise
 
 
 def document_to_image(
@@ -70,10 +70,27 @@ def document_to_image(
 
     # Try PyMuPDF
     try:
-        from data_utils.pdf_pymupdf import Document, pdf_to_images
+        from data_utils.pdf_pymupdf import Document as MuPDFDocument
+        from data_utils.pdf_pymupdf import pdf_to_images as mupdf_to_images
 
-        if isinstance(document, Document):
-            image: Image.Image = pdf_to_images(pdf=document, page_id=page_id, dpi=dpi, pixel_threshold=pixel_threshold)
+        if isinstance(document, MuPDFDocument):
+            image: Image.Image = mupdf_to_images(
+                pdf=document, page_id=page_id, dpi=dpi, pixel_threshold=pixel_threshold
+            )
+            if to_rgb:
+                image = image_to_rgb(image)
+            return image
+    except ImportError:
+        pass
+
+    # Try pypdfium2
+    try:
+        from pypdfium2 import PdfDocument
+
+        from data_utils.pdf_pypdfium2 import pdf_to_images as pdfium2_to_images
+
+        if isinstance(document, PdfDocument):
+            image = pdfium2_to_images(pdf=document, page_id=page_id, dpi=dpi, pixel_threshold=pixel_threshold)
             if to_rgb:
                 image = image_to_rgb(image)
             return image
@@ -138,6 +155,14 @@ def image_to_bytes(img: Image.Image) -> bytes:
     return buffered.getvalue()
 
 
+@overload
+def tiff_to_images(tiff_path: Path | str, page_id: int, pixel_threshold: int = ...) -> Image.Image: ...
+
+
+@overload
+def tiff_to_images(tiff_path: Path | str, page_id: None = None, pixel_threshold: int = ...) -> list[Image.Image]: ...
+
+
 def tiff_to_images(
     tiff_path: Path | str, page_id: int | None = None, pixel_threshold: int = 100_000_000
 ) -> list[Image.Image] | Image.Image:
@@ -156,7 +181,7 @@ def tiff_to_images(
 
         # Selected page.
         if page_id is not None:
-            if page_id > n_frames:
+            if page_id >= n_frames:
                 raise ValueError(f"Page {page_id} does not exist in TIFF with {n_frames} pages")
             img.seek(page_id)
             frame = image_to_rgb(img)

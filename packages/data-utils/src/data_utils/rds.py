@@ -8,26 +8,38 @@ from omegaconf import DictConfig
 logger = structlog.get_logger()
 
 
-def get_db_config_from_env():
-    """Creates a database configuration from standard PostgreSQL environment variables."""
+def get_db_config_from_env() -> DictConfig:
+    """Creates a database configuration from standard PostgreSQL environment variables.
+
+    Reads: PGHOST, PGPORT (default 5432), PGUSER, PGPASSWORD, PGDATABASE.
+    """
     return DictConfig(
         {
-            # TODO: Update after moving to production.
-            "host": os.getenv("PGHOST", "hermes-dev-hermesmain-postgres.coaneyfgilms.eu-central-1.rds.amazonaws.com"),
+            "host": os.getenv("PGHOST"),
             "port": int(os.getenv("PGPORT", 5432)),
-            "user": os.getenv("PGUSER", "postgres"),
-            "password": os.getenv("PGPASSWORD"),  # TODO: Update to read workflow variable.
-            "dbname": os.getenv("PGDATABASE", "hermes-ops-dev-demo2"),
+            "user": os.getenv("PGUSER"),
+            "password": os.getenv("PGPASSWORD"),
+            "dbname": os.getenv("PGDATABASE"),
         }
     )
 
 
 @contextmanager
 def db_connection(db_config: DictConfig | dict | None = None, raise_on_error: bool = False):
-    """
-    A context manager for database connections.
+    """Context manager for PostgreSQL connections.
 
-    It ensures that the connection is properly closed.
+    Args:
+        db_config: Database config with keys host, port, user, password, dbname.
+            If None, reads from environment variables via get_db_config_from_env().
+        raise_on_error: If True, raises on missing config or connection failure.
+            If False, yields None and logs the error.
+
+    Yields:
+        psycopg2 connection, or None if connection could not be established.
+
+    Raises:
+        ValueError: If config is incomplete and raise_on_error is True.
+        psycopg2.OperationalError: If connection fails and raise_on_error is True.
     """
     if db_config is None:
         db_config = get_db_config_from_env()

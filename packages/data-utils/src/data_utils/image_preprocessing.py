@@ -1,6 +1,6 @@
 """Image preprocessing."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import datetime
 from pathlib import Path
 
@@ -10,28 +10,6 @@ import structlog
 from PIL import Image
 
 logger = structlog.get_logger()
-
-
-def run_pipeline(arr: np.ndarray, pipeline: Sequence[str] = ("to_grayscale", "denoise")) -> np.ndarray:
-    """Preprocesses an image for OCR using local functions.
-
-    Args:
-        arr: Input image cv2 format.
-        pipeline: Tuple of preprocessing steps to apply in order. Each step should be a local function name as a string.
-    """
-
-    if pipeline:
-        arr = arr.copy()
-
-        # Apply each preprocessing step in sequence
-        for step in pipeline:
-            try:
-                step_function = globals()[step]
-                arr = step_function(arr)
-            except KeyError:
-                logger.exception("Preprocessing function not found.", function_name=step)
-
-    return arr
 
 
 def image_to_array(image: Image.Image | np.ndarray) -> np.ndarray:
@@ -45,7 +23,7 @@ def image_to_array(image: Image.Image | np.ndarray) -> np.ndarray:
             case "L":
                 # if it is grayscale, we leave it as is
                 return np.array(image)
-        # in any other case covert to RGB and then BGR for csv2 processing
+        # in any other case convert to RGB and then BGR for cv2 processing
         return cv2.cvtColor(np.array(image.convert("RGB")), cv2.COLOR_RGB2BGR)
 
     return image
@@ -254,13 +232,7 @@ def resize_image_to_dpi(image: Image.Image, target_dpi: int = 300) -> Image.Imag
     scale = target_dpi / orig_dpi
     new_size = (int(image.width * scale), int(image.height * scale))
 
-    try:
-        resample = Image.Resampling.LANCZOS
-    except AttributeError:
-        # For older Pillow versions.
-        resample = Image.LANCZOS  # type: ignore[reportAttributeAccessIssue]
-
-    resized = image.resize(new_size, resample)
+    resized = image.resize(new_size, Image.Resampling.LANCZOS)
     resized.info["dpi"] = (target_dpi, target_dpi)
 
     return resized
@@ -280,11 +252,51 @@ def save_image(arr: np.ndarray, save_dir: str = "debug_dir") -> np.ndarray:
     dt = now.strftime("%Y_%m_%d")
     ts = now.strftime("%H%M%S")
 
-    root_dir = Path(__name__).resolve()
+    root_dir = Path(__file__).parent
     _save_dir = root_dir / save_dir / dt
     _save_dir.mkdir(parents=True, exist_ok=True)
     save_path = _save_dir / f"{ts}.png"
 
     cv2.imwrite(str(save_path), arr)
+
+    return arr
+
+
+# Registry of named preprocessing steps for use in run_pipeline.
+_PIPELINE_REGISTRY: dict[str, Callable[[np.ndarray], np.ndarray]] = {
+    "to_grayscale": to_grayscale,
+    "denoise": denoise,
+    "enhance_contrast": enhance_contrast,
+    "sharpen_text": sharpen_text,
+    "set_threshold": set_threshold,
+    "binarize": binarize,
+    "save_image": save_image,
+}
+
+
+def run_pipeline(arr: np.ndarray, pipeline: Sequence[str] = ("to_grayscale", "denoise")) -> np.ndarray:
+    """Preprocesses an image for OCR using named pipeline steps.
+
+    Args:
+        arr: Input image in cv2 format.
+        pipeline: Ordered step names to apply. Each name must be a key in _PIPELINE_REGISTRY.
+
+    Returns:
+        Processed image array.
+    """
+    if not pipeline:
+        return arr
+
+    arr = arr.copy()
+    for step in pipeline:
+        step_fn = _PIPELINE_REGISTRY.get(step)
+        if step_fn is None:
+            logger.warning(
+                "Unknown preprocessing step — skipping.",
+                step=step,
+                available=list(_PIPELINE_REGISTRY),
+            )
+            continue
+        arr = step_fn(arr)
 
     return arr

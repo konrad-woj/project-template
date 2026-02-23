@@ -117,7 +117,7 @@ class S3Client:
                     matching_files.append(key)
 
         if not matching_files:
-            logger.info(f"No files matching '{pattern}' found.", bucket=bucket, path=path)
+            logger.info("No files matching pattern.", pattern=pattern, bucket=bucket, path=path)
 
         return matching_files
 
@@ -212,7 +212,9 @@ class S3Client:
             The path of the downloaded file or None if download failed.
         """
         logger.info("Downloading file from S3...", bucket=bucket, key=key, dest_dir=dest_dir)
-        dest_file = Path(dest_dir) / Path(key).name
+        dest_dir = Path(dest_dir)
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest_file = dest_dir / Path(key).name
         try:
             await asyncio.to_thread(self.s3_client.download_file, bucket, key, str(dest_file))
             return str(dest_file)
@@ -237,7 +239,7 @@ class S3Client:
         matching_paths = self.list_matching_files(bucket, path, pattern)
 
         if not matching_paths:
-            logger.warning(f"No files matching '{pattern}'.", bucket=bucket, key=path)
+            logger.warning("No files matching pattern.", pattern=pattern, bucket=bucket, path=path)
             return []
 
         dest_dir = Path(dest_dir or Path.cwd() / f"{bucket}")
@@ -248,10 +250,12 @@ class S3Client:
 
         downloaded_files = [f for f in results if f is not None]
         logger.info(
-            f"Downloaded {len(downloaded_files)} of {len(matching_paths)} files.",
+            "Downloaded files.",
+            downloaded=len(downloaded_files),
+            total=len(matching_paths),
             bucket=bucket,
-            key=path,
-            dest_dir=dest_dir,
+            path=path,
+            dest_dir=str(dest_dir),
         )
         return downloaded_files
 
@@ -272,7 +276,7 @@ class S3Client:
             return None
 
         try:
-            logger.info("Uploading to file to S3...", bucket=bucket, key=key_name, overwrite=overwrite)
+            logger.info("Uploading file to S3...", bucket=bucket, key=key_name, overwrite=overwrite)
             self.s3_client.put_object(Bucket=bucket, Key=key_name, Body=object_bytes)
             return f"s3://{bucket}/{key_name}"
         except ClientError:
@@ -291,23 +295,28 @@ class S3Client:
                 be appended to this path and result in e.g., s3://bucket/dir1/dir2/src_subdir/file.pdf .
             pattern: File pattern to match, e.g. "*", "*.pdf", "hermes*".
             overwrite: If False, skip uploading files that already exist in S3.
+
+        Returns:
+            List of S3 paths where files were uploaded.
         """
         src_dir_path = Path(src_dir)
-        matching_paths = list(src_dir_path.rglob(pattern))
-        tasks = []
-        for src_file in matching_paths:
-            if src_file.is_file():
-                async with aiofiles.open(src_file, "rb") as f:
-                    file_content = await f.read()
-                    key = f"{path}/{src_file.relative_to(src_dir_path)}"
-                    tasks.append(asyncio.to_thread(self.put_object, bucket, key, file_content, overwrite))
-        results = await asyncio.gather(*tasks)
+        src_files = [f for f in src_dir_path.rglob(pattern) if f.is_file()]
+
+        async def _upload_one(src_file: Path) -> str | None:
+            async with aiofiles.open(src_file, "rb") as f:
+                content = await f.read()
+            key = f"{path}/{src_file.relative_to(src_dir_path)}"
+            return await asyncio.to_thread(self.put_object, bucket, key, content, overwrite)
+
+        results = await asyncio.gather(*(_upload_one(f) for f in src_files))
         uploaded_files = [f for f in results if f is not None]
         logger.info(
-            f"Uploaded {len(uploaded_files)} of {len(matching_paths)} files.",
+            "Uploaded files.",
+            uploaded=len(uploaded_files),
+            total=len(src_files),
             bucket=bucket,
-            key=path,
-            src_dir=src_dir,
+            path=path,
+            src_dir=str(src_dir),
             overwrite=overwrite,
         )
         return uploaded_files
