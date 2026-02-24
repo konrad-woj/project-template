@@ -33,6 +33,18 @@ def pdf_to_images(pdf: Document, page_id: int, dpi: int = 200, pixel_threshold: 
 def pdf_to_images(
     pdf: Document, page_id: int | None = None, dpi: int = 200, pixel_threshold: int | None = None
 ) -> list[Image.Image] | Image.Image:
+    """Renders PDF page(s) to image(s) using PyMuPDF.
+
+    Args:
+        pdf: PyMuPDF Document object to render.
+        page_id: Optional page index to render. If None, renders all pages.
+        dpi: Dots per inch for rendering quality (default: 200).
+        pixel_threshold: Optional maximum total pixels (width * height) for rendered page(s). If exceeded,
+            raises ImageTooLargeError.
+
+    Returns:
+        A single PIL Image if page_id is specified, or a list of PIL Images for all pages if page_id is None.
+    """
     if page_id is None:
         return [pdf_page_to_image(pdf, i, dpi, pixel_threshold) for i in range(len(pdf))]
     return pdf_page_to_image(pdf, page_id, dpi, pixel_threshold)
@@ -44,11 +56,39 @@ def pdf_bytes_to_images(
     dpi: int = 200,
     pixel_threshold: int | None = None,
 ) -> list[Image.Image] | Image.Image:
+    """Loads PDF from bytes and renders page(s) to image(s) using PyMuPDF.
+
+    Args:
+        pdf_bytes: PDF file content as bytes or string.
+        page_id: Optional page index to render. If None, renders all pages.
+        dpi: Dots per inch for rendering quality (default: 200).
+        pixel_threshold: Optional maximum total pixels (width * height) for rendered page(s). If exceeded,
+            raises ImageTooLargeError.
+
+    Returns:
+        A single PIL Image if page_id is specified, or a list of PIL Images for all
+        pages if page_id is None.
+    """
     pdf = pymupdf.open(stream=pdf_bytes, filetype="pdf")
     return pdf_to_images(pdf, page_id, dpi, pixel_threshold)
 
 
 def pdf_page_to_image(pdf: Document, page_id: int, dpi: int = 200, pixel_threshold: int | None = None) -> Image.Image:
+    """Renders a PDF page to an image using PyMuPDF.
+
+    Args:
+        pdf: PyMuPDF Document object.
+        page_id: 0-based index of the page to render.
+        dpi: Dots per inch for rendering quality (default: 200).
+        pixel_threshold: Optional maximum total pixels (width * height) for rendered page. If exceeded,
+            raises ImageTooLargeError.
+
+    Returns:
+        A PIL Image of the rendered page.
+
+    Raises:
+        ImageTooLargeError: If the rendered page exceeds the specified pixel threshold.
+    """
     page = pdf.load_page(page_id)
     if pixel_threshold and pixel_threshold > 0:
         logger.info("Checking page size...", page_id=page_id, pixel_threshold=pixel_threshold)
@@ -61,6 +101,16 @@ def pdf_page_to_image(pdf: Document, page_id: int, dpi: int = 200, pixel_thresho
 
 
 def is_page_pixels_too_large(page: Page, pixel_threshold: int, dpi: int) -> bool:
+    """Checks if the rendered page would exceed the pixel threshold.
+
+    Args:
+        page: PyMuPDF Page object to check.
+        pixel_threshold: Maximum allowed total pixels (width * height) for the rendered page.
+        dpi: Dots per inch to calculate the zoom factor for rendering.
+
+    Returns:
+        True if the page exceeds the pixel threshold, False otherwise.
+    """
     width_in_points, height_in_points = page.mediabox.width, page.mediabox.height
     zoom = dpi / 72
     width_px, height_px = width_in_points * zoom, height_in_points * zoom

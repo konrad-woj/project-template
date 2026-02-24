@@ -16,6 +16,22 @@ def excel_to_dict(
     Automatically selects the appropriate engine based on file extension:
     - .xlsb files: tries multiple engines (openpyxl, pyxlsb) for compatibility
     - Other Excel files (.xlsx, .xls): uses calamine engine for better performance
+
+    Args:
+        io: File path, file-like object, or bytes to read from.
+        sheet_name: Name or index of the sheet to read (default: 0, which means the first sheet).
+        usecols: Optional list of columns to read (e.g., ["A", "C:E"] or [0, 2, 4]).
+        orient: Orientation of the resulting list of dictionaries (default: "records"). See pandas.DataFrame.to_dict()
+            for options.
+        **kwargs: Additional keyword arguments to pass to pandas.read_excel().
+
+    Returns:
+        A list of dictionaries representing the rows of the Excel sheet, with keys as column names and values as cell
+        values, formatted according to the specified orientation.
+
+    Raises:
+        ValueError: If the file extension is not recognized or if no suitable engine can read the file.
+        ImportError: If required engines for .xlsb files are not installed.
     """
     # Determine file extension to choose appropriate engine
     file_path = Path(str(io))

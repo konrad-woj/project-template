@@ -209,35 +209,6 @@ def resize_array_to_dpi(arr: np.ndarray, target_dpi: int = 300, source_dpi: int 
     return cv2.resize(arr, new_size, interpolation=cv2.INTER_CUBIC)
 
 
-def resize_image_to_dpi(image: Image.Image, target_dpi: int = 300) -> Image.Image:
-    """Changes the DPI of a PIL Image.
-
-    Args:
-        image: Input PIL Image
-        target_dpi: Desired DPI value
-
-    Returns:
-        PIL Image with updated DPI
-    """
-    orig_dpi = image.info.get("dpi")
-    if orig_dpi is None:
-        logger.info(
-            "No DPI metadata found in image, assuming target DPI. Return the same image, no resizing.",
-            target_dpi=target_dpi,
-        )
-        image.info["dpi"] = (target_dpi, target_dpi)
-        return image
-
-    orig_dpi = orig_dpi[0]
-    scale = target_dpi / orig_dpi
-    new_size = (int(image.width * scale), int(image.height * scale))
-
-    resized = image.resize(new_size, Image.Resampling.LANCZOS)
-    resized.info["dpi"] = (target_dpi, target_dpi)
-
-    return resized
-
-
 def save_image(arr: np.ndarray, save_dir: str = "debug_dir") -> np.ndarray:
     """Saves the image to a file. Can be used as pipeline step for debugging.
 

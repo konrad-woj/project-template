@@ -31,6 +31,19 @@ def pdf_to_images(
 def pdf_to_images(
     pdf: PdfDocument, page_id: int | None = None, dpi: int = 200, pixel_threshold: int | None = None
 ) -> list[Image.Image] | Image.Image:
+    """Renders PDF page(s) to image(s) using pypdfium2.
+
+    Args:
+        pdf: pypdfium2 PdfDocument object to render.
+        page_id: Optional page index to render. If None, renders all pages.
+        dpi: Dots per inch for rendering quality (default: 200).
+        pixel_threshold: Optional maximum total pixels (width * height) for rendered page(s). If exceeded,
+            raises ImageTooLargeError.
+
+    Returns:
+        A single PIL Image if page_id is specified, or a list of PIL Images for all
+        pages if page_id is None.
+    """
     if page_id is not None:
         return pdf_page_to_image(pdf, page_id, dpi, pixel_threshold)
     return [pdf_page_to_image(pdf, i, dpi, pixel_threshold) for i in range(len(pdf))]
@@ -39,6 +52,21 @@ def pdf_to_images(
 def pdf_page_to_image(
     pdf: PdfDocument, page_id: int, dpi: int = 200, pixel_threshold: int | None = None
 ) -> Image.Image:
+    """Renders a single PDF page to an image using pypdfium2.
+
+    Args:
+        pdf: pypdfium2 PdfDocument object to render.
+        page_id: Page index to render.
+        dpi: Dots per inch for rendering quality (default: 200).
+        pixel_threshold: Optional maximum total pixels (width * height) for rendered page. If exceeded,
+            raises ImageTooLargeError.
+
+    Returns:
+        A PIL Image of the rendered page.
+
+    Raises:
+        ImageTooLargeError: If the rendered page exceeds the specified pixel threshold.
+    """
     page = pdf.get_page(page_id)
     if pixel_threshold and pixel_threshold > 0:
         logger.info("Checking page size...", page_id=page_id, pixel_threshold=pixel_threshold)
@@ -49,6 +77,16 @@ def pdf_page_to_image(
 
 
 def is_page_pixels_too_large(page: PdfPage, pixel_threshold: int, dpi: int) -> bool:
+    """Checks if the total pixel count of a PDF page exceeds a specified threshold.
+
+    Args:
+        page: pypdfium2 PdfPage object to check.
+        pixel_threshold: Maximum allowed total pixels (width * height) for the page.
+        dpi: Dots per inch used for rendering, which affects the pixel dimensions.
+
+    Returns:
+        True if the page's total pixel count exceeds the threshold, False otherwise.
+    """
     width_in_points, height_in_points = page.get_size()
     zoom = dpi / 72
     width_px, height_px = width_in_points * zoom, height_in_points * zoom

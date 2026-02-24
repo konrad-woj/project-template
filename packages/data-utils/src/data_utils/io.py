@@ -109,52 +109,6 @@ def document_to_image(
     raise TypeError(f"Unsupported page type: {type(document)}.")
 
 
-def is_image_pixels_too_large(image: Image.Image, pixel_threshold: int) -> bool:
-    """Checks if the size (in pixels) of the PIL Image is too large.
-
-    Args:
-        image: PIL Image object.
-        pixel_threshold: Maximum number of pixels allowed.
-
-    Returns:
-        True if the size is too large, False otherwise.
-    """
-
-    width_px, height_px = image.size
-    total_pixels = round(width_px * height_px)
-
-    if total_pixels > pixel_threshold:
-        logger.warning(
-            "Image size exceeds threshold.",
-            pixel_threshold=pixel_threshold,
-            total_pixels=total_pixels,
-            image_size=image.size,
-        )
-        return True
-
-    return False
-
-
-def image_to_bytes(img: Image.Image) -> bytes:
-    """Encodes image as bytes.
-
-    This is equivalent to doing:
-    ```
-    with open(img_path, "rb") as f:
-        encoded_img = f.read()
-    ```
-
-    Args:
-        img: pillow.Image object
-
-    Returns:
-        image as bytes
-    """
-    buffered = BytesIO()
-    img.save(buffered, img.format or "PNG")
-    return buffered.getvalue()
-
-
 @overload
 def tiff_to_images(tiff_path: Path | str, page_id: int, pixel_threshold: int = ...) -> Image.Image: ...
 
@@ -200,6 +154,26 @@ def tiff_to_images(
             frame = image_to_rgb(img)
             images.append(frame)
         return images
+
+
+def image_to_bytes(img: Image.Image) -> bytes:
+    """Encodes image as bytes.
+
+    This is equivalent to doing:
+    ```
+    with open(img_path, "rb") as f:
+        encoded_img = f.read()
+    ```
+
+    Args:
+        img: pillow.Image object
+
+    Returns:
+        image as bytes
+    """
+    buffered = BytesIO()
+    img.save(buffered, img.format or "PNG")
+    return buffered.getvalue()
 
 
 def image_to_rgb(image: Image.Image, no_transparency: bool = True, keep_grayscale: bool = False) -> Image.Image:
@@ -264,4 +238,30 @@ def is_image_bytes(data: str | bytes | BytesIO) -> bool:
     for sig, _ in signatures:
         if header.startswith(sig):
             return True
+    return False
+
+
+def is_image_pixels_too_large(image: Image.Image, pixel_threshold: int) -> bool:
+    """Checks if the size (in pixels) of the PIL Image is too large.
+
+    Args:
+        image: PIL Image object.
+        pixel_threshold: Maximum number of pixels allowed.
+
+    Returns:
+        True if the size is too large, False otherwise.
+    """
+
+    width_px, height_px = image.size
+    total_pixels = round(width_px * height_px)
+
+    if total_pixels > pixel_threshold:
+        logger.warning(
+            "Image size exceeds threshold.",
+            pixel_threshold=pixel_threshold,
+            total_pixels=total_pixels,
+            image_size=image.size,
+        )
+        return True
+
     return False

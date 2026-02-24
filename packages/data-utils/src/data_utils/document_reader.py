@@ -4,7 +4,6 @@ import structlog
 from PIL import Image
 from pymupdf import Document
 
-from data_utils.image_preprocessing import resize_image_to_dpi
 from data_utils.io import (
     document_to_image,
     is_image_pixels_too_large,
@@ -27,8 +26,7 @@ class DocumentReader:
         self.base_dpi = base_dpi
         self.max_img_size = max_img_size
         self.pixel_threshold = pixel_threshold
-        # this should be true for app, and false for experiments
-        # if false it will attempt to downscale the image first
+        # This should be true for app, and false for experiments if false it will attempt to downscale the image first.
         self.raise_on_pixel_threshold = raise_on_pixel_threshold
         self.min_valid_dpi = min_valid_dpi
 
@@ -83,3 +81,32 @@ class DocumentReader:
             logger.info("Page too large, dropping DPI.", dpi=dpi, page_id=page_id)
 
         raise RuntimeError(f"Failed to extract image for page id={page_id}: minimum DPI reached")
+
+
+def resize_image_to_dpi(image: Image.Image, target_dpi: int = 300) -> Image.Image:
+    """Changes the DPI of a PIL Image.
+
+    Args:
+        image: Input PIL Image
+        target_dpi: Desired DPI value
+
+    Returns:
+        PIL Image with updated DPI
+    """
+    orig_dpi = image.info.get("dpi")
+    if orig_dpi is None:
+        logger.info(
+            "No DPI metadata found in image, assuming target DPI. Return the same image, no resizing.",
+            target_dpi=target_dpi,
+        )
+        image.info["dpi"] = (target_dpi, target_dpi)
+        return image
+
+    orig_dpi = orig_dpi[0]
+    scale = target_dpi / orig_dpi
+    new_size = (int(image.width * scale), int(image.height * scale))
+
+    resized = image.resize(new_size, Image.Resampling.LANCZOS)
+    resized.info["dpi"] = (target_dpi, target_dpi)
+
+    return resized
