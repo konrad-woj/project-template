@@ -1,18 +1,22 @@
 [project]
 name = "agentic-idp-app"
 version = "0.1.0"
-description = "Add your description here"
+description = "Agentic Intelligent Document Processing: OCR, layout detection, reading order, and VLM-powered question answering."
 readme = "README.md"
 requires-python = "~=3.13.0"
 
 dependencies = [
-    "aiobotocore>=2.20.0",
-    "boto3>=1.37.1",
-    "google-genai>=1.21.1",
-    "jinja2>=3.1.6",
     "langchain>=1.2.10",
+    "langchain-openai>=0.3.0",
+    "langchain-core>=0.3.0",
     "logger",
+    "numpy>=2.0.0",
+    "opencv-python-headless>=4.10.0",
+    "paddleocr>=2.8.0",
     "pillow>=11.1.0",
+    "python-dotenv>=1.0.0",
+    "torch>=2.5.0",
+    "transformers>=4.40.0",
 ]
 
 [tool.uv.sources]
@@ -37,7 +41,7 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["packages/agentic-idp-app"]
+packages = ["src/agentic_idp_app"]
 
 [tool.ruff]
 line-length = 120
@@ -50,7 +54,7 @@ quote-style = "double"
 [tool.ruff.lint]
 select = ["A", "B", "C", "E", "F", "W", "I", "UP", "FURB", "RUF", "PD"]
 exclude = [".venv"]
-ignore = ["E501", "C901",]
+ignore = ["E501", "C901"]
 
 [tool.pyright]
 venvPath = "."
