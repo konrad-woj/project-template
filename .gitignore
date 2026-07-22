@@ -17,7 +17,6 @@ env/
 
 # uv
 .uv/
-uv.lock
 
 # Testing
 .pytest_cache/
@@ -39,7 +38,7 @@ htmlcov/
 
 # IDE
 .vscode/
-.idea/
+**/.idea/
 *.swp
 *.swo
 *~
@@ -64,3 +63,9 @@ docs/_build/
 *.parquet
 *.csv
 *.jsonl
+results/
+
+# Claude
+.claude/
+CLAUDE.md
+CLAUDE.local.md
