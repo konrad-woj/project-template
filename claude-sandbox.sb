@@ -1,0 +1,59 @@
+(version 1)
+(allow default)
+(deny file-read*
+
+  ; ── SSH ──
+  (subpath "/Users/konradwojciechowski/.ssh")
+  (subpath "/Users/konradwojciechowski/.ssh_bb")
+  (subpath "/Users/konradwojciechowski/.ssh_kw")
+
+  ; ── AWS ──
+  (subpath "/Users/konradwojciechowski/.aws")
+
+  ; ── GCP ──
+  (subpath "/Users/konradwojciechowski/.config/gcloud")
+  (regex #"/Users/konradwojciechowski/.*application_default_credentials\\.json$")
+  (regex #"/Users/konradwojciechowski/.*service.account.*\\.json$")
+  (regex #"/Users/konradwojciechowski/.*google-services\\.json$")
+  (regex #"/Users/konradwojciechowski/.*GoogleService-Info\\.plist$")
+
+  ; ── Azure ──
+  (subpath "/Users/konradwojciechowski/.azure")
+
+  ; ── Docker ──
+  (subpath "/Users/konradwojciechowski/.docker")
+
+  ; ── Kubernetes ──
+  (subpath "/Users/konradwojciechowski/.kube")
+
+  ; ── GPG / password managers ──
+  (subpath "/Users/konradwojciechowski/.gnupg")
+  (subpath "/Users/konradwojciechowski/.password-store")
+  (subpath "/Users/konradwojciechowski/.local/share/keyrings")
+
+  ; ── npm / pip / package managers ──
+  (subpath "/Users/konradwojciechowski/.npmrc")
+  (subpath "/Users/konradwojciechowski/.pypirc")
+  (subpath "/Users/konradwojciechowski/.netrc")
+
+  ; ── macOS keychain / credentials ──
+  (subpath "/Users/konradwojciechowski/Library/Application Support/1Password")
+  (subpath "/Users/konradwojciechowski/Library/Application Support/Bitwarden")
+
+  ; ── Shell history (may contain tokens pasted in terminal) ──
+  (literal "/Users/konradwojciechowski/.zsh_history")
+  (literal "/Users/konradwojciechowski/.bash_history")
+
+  ; ── File pattern wildcards ──
+  (regex #"/Users/konradwojciechowski/.*\\.env$")
+  (regex #"/Users/konradwojciechowski/.*\\.env\\..*$")
+  (regex #"/Users/konradwojciechowski/.*\\.pem$")
+  (regex #"/Users/konradwojciechowski/.*\\.key$")
+  (regex #"/Users/konradwojciechowski/.*\\.rsa$")
+  (regex #"/Users/konradwojciechowski/.*\\.p12$")
+  (regex #"/Users/konradwojciechowski/.*\\.pfx$")
+  (regex #"/Users/konradwojciechowski/.*\\.keystore$")
+  (regex #"/Users/konradwojciechowski/.*secrets.*\\.json$")
+  (regex #"/Users/konradwojciechowski/.*credentials.*\\.json$")
+  (regex #"/Users/konradwojciechowski/.*\\.token$")
+)
