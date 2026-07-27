@@ -1,0 +1,7 @@
+{
+  "name": "project-template",
+  "private": true,
+  "devDependencies": {
+    "openwiki": "0.2.3"
+  }
+}

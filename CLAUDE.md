@@ -77,15 +77,19 @@ Package level (run from `packages/{package_name}`):
 uv run python <path_to_file>
 uv run python -m <module>
 uv run pytest tests/
-uv run task precommit
+uv run task precommits
 ```
 
 Repo level:
 ```
-sh run_on_each.sh -b "uv run task precommit"
+sh run_on_each.sh -b "uv run task precommits"
 sh run_on_each.sh -b "uv lock"
 docker build -f Dockerfile.{package_name} -t {image_name} .
+npx openwiki --init          # one-time setup of repo docs; review output before committing
+npx openwiki                 # interactive doc chat over the current repo
+npx openwiki code --update --print   # manual local doc refresh
 ```
+Note: openwiki commands default to Gemini (see .env.example); CI (.github/workflows/openwiki-update.yml) also uses Gemini since GitHub-hosted runners can't reach a local model server. For fully local/offline use, uncomment the openai-compatible block in .env.example instead.
 
 ## Code Structure
 
@@ -127,14 +131,18 @@ docker build -f Dockerfile.{package_name} -t {image_name} .
         timer.py
         async_timer.py
   Dockerfile.{package_name}  # Dockerfiles for each package, located in the repo root as they use multiple packages
-  run_on_each.sh  # helper script to run commands in all packages, e.g., sh run_on_each.sh -b "uv run task precommit"
+  run_on_each.sh  # helper script to run commands in all packages, e.g., sh run_on_each.sh -b "uv run task precommits"
   CLAUDE.md  # project instructions for Claude
+  AGENTS.md  # written/maintained by OpenWiki (managed <!-- OPENWIKI:START/END --> block); do not hand-edit that block
   MY_NEW_DESIGN_NAME.md  # per-feature design doc, copied from DESIGN_DOC_TEMPLATE.md
   DESIGN_DOC_TEMPLATE.md  # template - copy, don't edit in place
   pyproject.toml.example  # template - copy into a new package dir, don't edit in place
+  package.json, package-lock.json  # pins the openwiki npm devDependency version; run via npx, not global install
+  openwiki/  # OpenWiki-generated repo docs; openwiki/INSTRUCTIONS.md scopes what it should/shouldn't document
+  .github/workflows/openwiki-update.yml  # on-demand (workflow_dispatch) CI job that auto-PRs OpenWiki doc updates
   .env.example  # template listing required env var names, keep in sync with actual usage
   .env  # local env file, never commit populated .env files
-  .gitignore  # ignore .env, .venv, __pycache__, etc.
+  .gitignore  # ignore .env, .venv, __pycache__, node_modules, etc.
 ```
 
 ## Skills
@@ -149,9 +157,10 @@ docker build -f Dockerfile.{package_name} -t {image_name} .
 - All Dockerfiles are located in `{repo_root}` as they use multiple packages.
 - Always use uv by going into the package dir (`{repo_root}/packages/{package_name}`) and running uv commands from there - this ensures that the correct environment is used.
 - Inside the package dir you must always:
-  - Use `uv run task precommit` when you're done making a series of code changes. This will run ruff checks and pyright typechecks. If found pyright errors are not important, ignore them specifically for particular lines of code.
+  - Use `uv run task precommits` when you're done making a series of code changes. This will run ruff checks and pyright typechecks. If found pyright errors are not important, ignore them specifically for particular lines of code.
   - Put unit tests in `./tests/unit` and run with `uv run pytest tests/unit`.
   - Put integration tests in `./tests/integration` and run with `uv run pytest tests/integration`.
+  - Focus tests on critical logic, edge cases, and integration points - skip tests that add little value or are already covered by Pydantic validation.
   - Put all generated `.md` files in `./docs`, updating existing ones. Keep docs concise, reference the code, and add example usages - avoid repetitions, rationale, and estimates.
   - Never redefine the `logger` package locally - depend on it via `[tool.uv.sources]` pointing at the shared git repo (see `packages/pyproject.toml.example`), configure it with `configure_logger("INFO")` once in the executable entrypoint, and create it with `logger = structlog.get_logger()` when needed.
   - For execution timing use the `timer` or `async_timer` decorators from the `logger` package.
