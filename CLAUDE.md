@@ -67,7 +67,7 @@ Working with a senior engineer focused on Python AI/ML microservices and POCs fo
 ## New Project Setup
 
 - Copy `packages/pyproject.toml.example` to `packages/{package_name}/pyproject.toml` and populate `name`, `description`, and dependencies.
-- Copy `DESIGN_DOC_TEMPLATE.md` to `MY_NEW_DESIGN_NAME.md` at the repo root and fill it in before starting a new feature or service (see `/designdoc-creator` skill).
+- Copy `docs/DESIGN_DOC_TEMPLATE.md` to `MY_NEW_DESIGN_NAME.md` at the repo root and fill it in before starting a new feature or service (see `/designdoc-creator` skill).
 - Copy `.env.example` to `.env` (repo root) and per-package `.env` files, and populate required keys (e.g. `GEMINI_API_KEY`, `OPENAI_API_KEY`). Never commit populated `.env` files.
 
 ## Bash Commands
@@ -134,8 +134,8 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
   run_on_each.sh  # helper script to run commands in all packages, e.g., sh run_on_each.sh -b "uv run task precommits"
   CLAUDE.md  # project instructions for Claude
   AGENTS.md  # written/maintained by OpenWiki (managed <!-- OPENWIKI:START/END --> block); do not hand-edit that block
-  MY_NEW_DESIGN_NAME.md  # per-feature design doc, copied from DESIGN_DOC_TEMPLATE.md
-  DESIGN_DOC_TEMPLATE.md  # template - copy, don't edit in place
+  MY_NEW_DESIGN_NAME.md  # per-feature design doc, copied from docs/DESIGN_DOC_TEMPLATE.md
+  docs/DESIGN_DOC_TEMPLATE.md  # template - copy, don't edit in place
   pyproject.toml.example  # template - copy into a new package dir, don't edit in place
   package.json, package-lock.json  # pins the openwiki npm devDependency version; run via npx, not global install
   openwiki/  # OpenWiki-generated repo docs; openwiki/INSTRUCTIONS.md scopes what it should/shouldn't document
@@ -167,3 +167,13 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
   - Generic, cross-package utilities are located in `../data-utils` - check it before implementing new utilities locally.
   - Generic, cross-package pydantic models are located in `../data-models` - check it before implementing new models locally.
   - Use environment variables from `.env` if present, keeping `.env.example` up to date whenever a new variable is introduced.
+
+<!-- OPENWIKI:START -->
+
+## OpenWiki
+
+This repository uses OpenWiki for recurring code documentation. Start with `openwiki/quickstart.md`, then follow its links to architecture, workflows, domain concepts, operations, integrations, testing guidance, and source maps.
+
+The scheduled OpenWiki GitHub Actions workflow refreshes the repository wiki. Do not hand-edit generated OpenWiki pages unless explicitly asked; prefer updating source code/docs and letting OpenWiki regenerate.
+
+<!-- OPENWIKI:END -->
