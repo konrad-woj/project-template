@@ -15,6 +15,9 @@ build/
 venv/
 env/
 
+# Node
+node_modules/
+
 # uv
 .uv/
 

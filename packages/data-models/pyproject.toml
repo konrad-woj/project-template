@@ -50,4 +50,4 @@ venvPath = "."
 venv = ".venv"
 
 [tool.taskipy.tasks]
-precommit = { cmd = "uvx ruff check . && uvx ruff format . && uvx pyright .", help = "Run lint, format, and typecheck" }
+precommits = { cmd = "uvx ruff check . && uvx ruff format . && uvx pyright . && npx --yes markdownlint-cli@0.49.1 '**/*.md' --ignore .venv", help = "Run lint, format, and typecheck, and lint Markdown docs" }

@@ -1,6 +1,6 @@
 # Title
 
-> **How to use this document as a template.** This service — the six-node LangGraph workflow, its REST API, its prompts, its eval pipeline — is shipped and running; treat it as background and architecture, not as something still being decided. Goals and Non-Goals below describe only the change in this revision. As short as possible, as long as necessary: state only the part of the existing architecture needed to ground the new contract, and link to [README.md](../README.md) / the code for everything else — don't re-paste tables that aren't changing, they'll just go stale. Every subsection under **Proposal** is optional — delete any that this revision doesn't touch, rather than filling it with "unchanged." When you plan the *next* feature on top of this service, copy this file, fold the *previous* revision's Goals into Background as settled fact, and write fresh Goals/Non-Goals for only what you're adding.
+> **How to use this document as a template.** Goals and Non-Goals below describe only the change in this revision. So if the feature you design is not greenfield but an extension or additional feature, don't document the whole system you are building on top of. Instead, keep it as short as possible, as long as necessary: state only the part of the existing architecture needed to ground the new contract, and link to [README.md](../README.md) / the code for everything else — don't re-paste tables that aren't changing, they'll just go stale. Every subsection under **Proposal** is optional — delete any that this revision doesn't touch, rather than filling it with "unchanged." When you plan the *next* feature on top of this service, copy this file, fold the *previous* revision's Goals into Background as settled fact, and write fresh Goals/Non-Goals for only what you're adding.
 
 ## TL;DR
 
@@ -10,7 +10,7 @@
 
 > Explain the context and why this document exists.
 
-**See [README.md](README.md) for current state of the service**
+**See [README.md](../README.md) for current state of the service**
 
 ## Goals
 

@@ -42,7 +42,7 @@ venvPath = "."
 venv = ".venv"
 
 [tool.taskipy.tasks]
-precommits = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright .", help = "Lint, format and typecheck Python codebase" }
+precommits = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright . && npx --yes markdownlint-cli@0.49.1 '**/*.md' --ignore .venv", help = "Lint, format and typecheck Python codebase, and lint Markdown docs" }
 app = { cmd = "uv run python -m app --port 8000", help = "Run API dev server" }
 openapi = { cmd = "uv run python -m app --openapi", help = "Generate OpenAPI spec for chatbot API" }
 

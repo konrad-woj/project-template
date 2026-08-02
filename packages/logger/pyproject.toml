@@ -41,6 +41,7 @@ ignore = ["E501", "C901",]
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
+pythonVersion = "3.13"
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -49,7 +50,7 @@ convention = "google"
 ignore-overlong-task-comments = true
 
 [tool.taskipy.tasks]
-precommit = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright .", help = "Lint, format and typecheck Python codebase" }
+precommits = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright . && npx --yes markdownlint-cli@0.49.1 '**/*.md' --ignore .venv", help = "Lint, format and typecheck Python codebase, and lint Markdown docs" }
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
