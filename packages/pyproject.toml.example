@@ -56,4 +56,4 @@ pythonpath = ["."]
 package = false
 
 [tool.uv.sources]
-logger = { git = "https://github.com/vaillant-group/da-genai-python-utils.git", subdirectory = "packages/logger" }
+logger = { git = "https://github.com/konrad-woj/logger.git" }
