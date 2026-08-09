@@ -11,6 +11,9 @@ Working with a senior engineer focused on Python AI/ML microservices and POCs fo
 - No emojis unless explicitly requested.
 - For exploratory questions, give a recommendation + the main tradeoff in 2-3 sentences. Don't implement until confirmed.
 - Poll me for decisions when there are multiple valid options or when the best choice isn't clear. Don't make assumptions about preferences.
+- Never name the AI assistant or an employer in repo artifacts — branch names, commit messages, PR titles/bodies, code comments, docs.
+- Never prefix branches with `claude/`. Use `feature/`, `fix/`, or `chore/` followed by a short kebab-case description.
+- Never add `Co-Authored-By`, `Generated with`, or session-link trailers to commits or PR bodies.
 
 ## Code Style
 
