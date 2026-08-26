@@ -3,57 +3,164 @@
 (deny file-read*
 
   ; ── SSH ──
-  (subpath "/Users/konradwojciechowski/.ssh")
-  (subpath "/Users/konradwojciechowski/.ssh_bb")
-  (subpath "/Users/konradwojciechowski/.ssh_kw")
+  (subpath "/Users/konrad.wojciechowski/.ssh")
 
   ; ── AWS ──
-  (subpath "/Users/konradwojciechowski/.aws")
+  (subpath "/Users/konrad.wojciechowski/.aws")
+  (literal "/Users/konrad.wojciechowski/.boto")
 
   ; ── GCP ──
-  (subpath "/Users/konradwojciechowski/.config/gcloud")
-  (regex #"/Users/konradwojciechowski/.*application_default_credentials\\.json$")
-  (regex #"/Users/konradwojciechowski/.*service.account.*\\.json$")
-  (regex #"/Users/konradwojciechowski/.*google-services\\.json$")
-  (regex #"/Users/konradwojciechowski/.*GoogleService-Info\\.plist$")
+  (subpath "/Users/konrad.wojciechowski/.config/gcloud")
+  (regex #"/Users/konrad.wojciechowski/.*application_default_credentials\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*service.account.*\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*google-services\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*GoogleService-Info\\.plist$")
 
   ; ── Azure ──
-  (subpath "/Users/konradwojciechowski/.azure")
+  (subpath "/Users/konrad.wojciechowski/.azure")
 
   ; ── Docker ──
-  (subpath "/Users/konradwojciechowski/.docker")
+  (subpath "/Users/konrad.wojciechowski/.docker")
 
   ; ── Kubernetes ──
-  (subpath "/Users/konradwojciechowski/.kube")
+  (subpath "/Users/konrad.wojciechowski/.kube")
+
+  ; ── Terraform / Vault ──
+  (literal "/Users/konrad.wojciechowski/.terraformrc")
+  (subpath "/Users/konrad.wojciechowski/.terraform.d")
+  (literal "/Users/konrad.wojciechowski/.vault-token")
+
+  ; ── Git / GitHub / deploy CLIs ──
+  ; .gitconfig is read-allowed: git reads it on every invocation (even
+  ; `git --version`), so denying reads here breaks git entirely under this
+  ; profile. It's still write-denied below to block tampering (e.g. a
+  ; malicious credential.helper or url.insteadOf rewrite).
+  (literal "/Users/konrad.wojciechowski/.git-credentials")
+  (subpath "/Users/konrad.wojciechowski/.config/gh")
+  (subpath "/Users/konrad.wojciechowski/.netlify")
+  (subpath "/Users/konrad.wojciechowski/.vercel")
+  (subpath "/Users/konrad.wojciechowski/.config/configstore")
+
+  ; ── Databases ──
+  (literal "/Users/konrad.wojciechowski/.pgpass")
+  (literal "/Users/konrad.wojciechowski/.my.cnf")
 
   ; ── GPG / password managers ──
-  (subpath "/Users/konradwojciechowski/.gnupg")
-  (subpath "/Users/konradwojciechowski/.password-store")
-  (subpath "/Users/konradwojciechowski/.local/share/keyrings")
+  (subpath "/Users/konrad.wojciechowski/.gnupg")
+  (subpath "/Users/konrad.wojciechowski/.password-store")
+  (subpath "/Users/konrad.wojciechowski/.local/share/keyrings")
 
   ; ── npm / pip / package managers ──
-  (subpath "/Users/konradwojciechowski/.npmrc")
-  (subpath "/Users/konradwojciechowski/.pypirc")
-  (subpath "/Users/konradwojciechowski/.netrc")
+  (subpath "/Users/konrad.wojciechowski/.npmrc")
+  (subpath "/Users/konrad.wojciechowski/.pypirc")
+  (subpath "/Users/konrad.wojciechowski/.netrc")
 
   ; ── macOS keychain / credentials ──
-  (subpath "/Users/konradwojciechowski/Library/Application Support/1Password")
-  (subpath "/Users/konradwojciechowski/Library/Application Support/Bitwarden")
+  (subpath "/Users/konrad.wojciechowski/Library/Application Support/1Password")
+  (subpath "/Users/konrad.wojciechowski/Library/Application Support/Bitwarden")
+  (subpath "/Users/konrad.wojciechowski/Library/Keychains")
 
   ; ── Shell history (may contain tokens pasted in terminal) ──
-  (literal "/Users/konradwojciechowski/.zsh_history")
-  (literal "/Users/konradwojciechowski/.bash_history")
+  (literal "/Users/konrad.wojciechowski/.zsh_history")
+  (literal "/Users/konrad.wojciechowski/.bash_history")
 
   ; ── File pattern wildcards ──
-  (regex #"/Users/konradwojciechowski/.*\\.env$")
-  (regex #"/Users/konradwojciechowski/.*\\.env\\..*$")
-  (regex #"/Users/konradwojciechowski/.*\\.pem$")
-  (regex #"/Users/konradwojciechowski/.*\\.key$")
-  (regex #"/Users/konradwojciechowski/.*\\.rsa$")
-  (regex #"/Users/konradwojciechowski/.*\\.p12$")
-  (regex #"/Users/konradwojciechowski/.*\\.pfx$")
-  (regex #"/Users/konradwojciechowski/.*\\.keystore$")
-  (regex #"/Users/konradwojciechowski/.*secrets.*\\.json$")
-  (regex #"/Users/konradwojciechowski/.*credentials.*\\.json$")
-  (regex #"/Users/konradwojciechowski/.*\\.token$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.env$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.env\\..*$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.pem$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.key$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.rsa$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.p12$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.pfx$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.keystore$")
+  (regex #"/Users/konrad.wojciechowski/.*secrets.*\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*credentials.*\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.token$")
+)
+
+; Write-side mirror of the block above, plus a few write-only targets.
+; Goal: block tampering/persistence (e.g. rewriting ~/.ssh/config with a
+; malicious ProxyCommand, planting a backdoor in shell rc files, or
+; overwriting credential helpers), not just credential exfiltration.
+(deny file-write*
+
+  ; ── SSH ──
+  (subpath "/Users/konrad.wojciechowski/.ssh")
+
+  ; ── AWS ──
+  (subpath "/Users/konrad.wojciechowski/.aws")
+  (literal "/Users/konrad.wojciechowski/.boto")
+
+  ; ── GCP ──
+  (subpath "/Users/konrad.wojciechowski/.config/gcloud")
+  (regex #"/Users/konrad.wojciechowski/.*application_default_credentials\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*service.account.*\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*google-services\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*GoogleService-Info\\.plist$")
+
+  ; ── Azure ──
+  (subpath "/Users/konrad.wojciechowski/.azure")
+
+  ; ── Docker ──
+  (subpath "/Users/konrad.wojciechowski/.docker")
+
+  ; ── Kubernetes ──
+  (subpath "/Users/konrad.wojciechowski/.kube")
+
+  ; ── Terraform / Vault ──
+  (literal "/Users/konrad.wojciechowski/.terraformrc")
+  (subpath "/Users/konrad.wojciechowski/.terraform.d")
+  (literal "/Users/konrad.wojciechowski/.vault-token")
+
+  ; ── Git / GitHub / deploy CLIs ──
+  (literal "/Users/konrad.wojciechowski/.gitconfig")
+  (literal "/Users/konrad.wojciechowski/.git-credentials")
+  (subpath "/Users/konrad.wojciechowski/.config/gh")
+  (subpath "/Users/konrad.wojciechowski/.netlify")
+  (subpath "/Users/konrad.wojciechowski/.vercel")
+  (subpath "/Users/konrad.wojciechowski/.config/configstore")
+
+  ; ── Databases ──
+  (literal "/Users/konrad.wojciechowski/.pgpass")
+  (literal "/Users/konrad.wojciechowski/.my.cnf")
+
+  ; ── GPG / password managers ──
+  (subpath "/Users/konrad.wojciechowski/.gnupg")
+  (subpath "/Users/konrad.wojciechowski/.password-store")
+  (subpath "/Users/konrad.wojciechowski/.local/share/keyrings")
+
+  ; ── npm / pip / package managers ──
+  (subpath "/Users/konrad.wojciechowski/.npmrc")
+  (subpath "/Users/konrad.wojciechowski/.pypirc")
+  (subpath "/Users/konrad.wojciechowski/.netrc")
+
+  ; ── macOS keychain / credentials ──
+  (subpath "/Users/konrad.wojciechowski/Library/Application Support/1Password")
+  (subpath "/Users/konrad.wojciechowski/Library/Application Support/Bitwarden")
+  (subpath "/Users/konrad.wojciechowski/Library/Keychains")
+
+  ; ── Shell history ──
+  (literal "/Users/konrad.wojciechowski/.zsh_history")
+  (literal "/Users/konrad.wojciechowski/.bash_history")
+
+  ; ── Shell startup files (persistence / backdoor risk) ──
+  (literal "/Users/konrad.wojciechowski/.zshrc")
+  (literal "/Users/konrad.wojciechowski/.zprofile")
+  (literal "/Users/konrad.wojciechowski/.zshenv")
+  (literal "/Users/konrad.wojciechowski/.bashrc")
+  (literal "/Users/konrad.wojciechowski/.bash_profile")
+  (literal "/Users/konrad.wojciechowski/.profile")
+
+  ; ── File pattern wildcards ──
+  (regex #"/Users/konrad.wojciechowski/.*\\.env$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.env\\..*$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.pem$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.key$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.rsa$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.p12$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.pfx$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.keystore$")
+  (regex #"/Users/konrad.wojciechowski/.*secrets.*\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*credentials.*\\.json$")
+  (regex #"/Users/konrad.wojciechowski/.*\\.token$")
 )
