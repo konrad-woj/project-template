@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run task:*)",
+      "Bash(sh run_on_each.sh \"uv run task precommit\")",
+      "Bash(sh ../../run_on_each.sh \"uv run task precommit\")",
+      "Bash(uv run:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(grep:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:pypi.org)",
+      "Bash(cd /Users/konradwojciechowski/Repo/Konrad/project-template && mv packages/agentic-idp-app packages/agentic-idp && mv packages/agentic-idp/src/agentic_idp_app packages/agentic-idp/src/agentic_idp)",
+      "Bash(find /Users/konradwojciechowski/Repo/Konrad/project-template/packages/agentic-idp -name \"*.py\" -o -name \"*.toml\" -o -name \"*.md\" | grep -v \".venv\" | grep -v \"__pycache__\" | xargs sed -i '' 's/agentic_idp_app/agentic_idp/g; s/agentic-idp-app/agentic-idp/g')",
+      "Bash(find /Users/konradwojciechowski/Repo/Konrad/project-template/packages/fastmcp-app -name \"*.py\" -o -name \"*.toml\" -o -name \"*.md\" | grep -v \".venv\" | grep -v \"__pycache__\" | xargs sed -i '' 's/agentic-idp-app/agentic-idp/g')",
+      "Bash(uv sync:*)",
+      "Bash(uvx pyright:*)",
+      "Bash(uvx ruff:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm view *)"
+    ]
+  }
+}
