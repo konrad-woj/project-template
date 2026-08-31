@@ -15,6 +15,7 @@ dev = [
     "pytest>=8.3.4",
     "rich>=13.9.4",
     "taskipy>=1.14.1",
+    "tach>=0.35.0,<1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -50,7 +51,8 @@ convention = "google"
 ignore-overlong-task-comments = true
 
 [tool.taskipy.tasks]
-precommits = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright . && npx --yes markdownlint-cli@0.49.1 '**/*.md' --ignore .venv", help = "Lint, format and typecheck Python codebase, and lint Markdown docs" }
+precommits = { cmd = "uvx ruff format . && uvx ruff check . --fix --unsafe-fixes && uvx pyright . && uvx tach check && npx --yes markdownlint-cli@0.49.1 '**/*.md' --ignore .venv", help = "Lint, format and typecheck Python codebase, check module boundaries, and lint Markdown docs" }
+tach = { cmd = "uvx tach check", help = "Check module boundaries against tach.toml" }
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
