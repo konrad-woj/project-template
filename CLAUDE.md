@@ -60,6 +60,7 @@ Working with a senior engineer focused on Python AI/ML microservices and POCs fo
 - Pydantic for data validation. Put models in `models.py` or `schemas.py` as appropriate. For API contracts (input/output messages), use `from data_models.models import BaseSchema` (from `../data-models`) instead of Pydantic's `BaseModel`.
 - FastAPI for web services. Organize routers under `routers/`, models in `models.py`, keep `main.py` as entrypoint only.
 - Use dataclasses for simple configs, Hydra for multi-environment or composable configs. Never use JSON or ENV vars for complex configuration other than FastAPI settings.
+- Tach for enforcing module boundaries within a package. Every package ships a `tach.toml`; run `uv run task tach` (or `uvx tach check`) to validate, and `uvx tach sync --add` to update it after adding or moving modules.
 
 ## Best Practices
 
@@ -70,6 +71,7 @@ Working with a senior engineer focused on Python AI/ML microservices and POCs fo
 ## New Project Setup
 
 - Copy `packages/pyproject.toml.example` to `packages/{package_name}/pyproject.toml` and populate `name`, `description`, and dependencies.
+- Copy `packages/tach.toml.example` to `packages/{package_name}/tach.toml`, then run `uvx tach sync --add` from within the package once its modules take shape to keep boundaries in sync.
 - Copy `docs/DESIGN_DOC_TEMPLATE.md` to `MY_NEW_DESIGN_NAME.md` at the repo root and fill it in before starting a new feature or service (see `/designdoc-creator` skill).
 - Copy `.env.example` to `.env` (repo root) and per-package `.env` files, and populate required keys (e.g. `GEMINI_API_KEY`, `OPENAI_API_KEY`). Never commit populated `.env` files.
 
@@ -101,6 +103,7 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
   packages/
     {package-name}/
       .env
+      tach.toml  # module boundaries, copied from packages/tach.toml.example and synced with `uvx tach sync --add`
       src/{package_name}/
         main.py
       tests/
@@ -124,10 +127,12 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
         __init__.py
         {util_name}.py
     data-models/  # cross-package pydantic models, e.g., for API contracts, data validation, etc.
+      tach.toml
       src/data_models/
         __init__.py
         models.py
     logger/  # reference copy only - real dependency comes from the shared git repo via [tool.uv.sources], do not fork/redefine per project
+      tach.toml
       src/logger/
         __init__.py
         logger.py
@@ -140,6 +145,7 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
   MY_NEW_DESIGN_NAME.md  # per-feature design doc, copied from docs/DESIGN_DOC_TEMPLATE.md
   docs/DESIGN_DOC_TEMPLATE.md  # template - copy, don't edit in place
   pyproject.toml.example  # template - copy into a new package dir, don't edit in place
+  tach.toml.example  # template - copy into a new package dir as tach.toml, don't edit in place
   package.json, package-lock.json  # pins the openwiki npm devDependency version; run via npx, not global install
   openwiki/  # OpenWiki-generated repo docs; openwiki/INSTRUCTIONS.md scopes what it should/shouldn't document
   .github/workflows/openwiki-update.yml  # on-demand (workflow_dispatch) CI job that auto-PRs OpenWiki doc updates
@@ -160,7 +166,7 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
 - All Dockerfiles are located in `{repo_root}` as they use multiple packages.
 - Always use uv by going into the package dir (`{repo_root}/packages/{package_name}`) and running uv commands from there - this ensures that the correct environment is used.
 - Inside the package dir you must always:
-  - Use `uv run task precommits` when you're done making a series of code changes. This will run ruff checks and pyright typechecks. If found pyright errors are not important, ignore them specifically for particular lines of code.
+  - Use `uv run task precommits` when you're done making a series of code changes. This will run ruff checks, pyright typechecks, and tach module boundary checks. If found pyright errors are not important, ignore them specifically for particular lines of code. When a change adds or moves modules, run `uvx tach sync --add` in the package before committing so `tach.toml` reflects the real dependency graph.
   - Put unit tests in `./tests/unit` and run with `uv run pytest tests/unit`.
   - Put integration tests in `./tests/integration` and run with `uv run pytest tests/integration`.
   - Focus tests on critical logic, edge cases, and integration points - skip tests that add little value or are already covered by Pydantic validation.

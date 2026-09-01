@@ -10,7 +10,7 @@ See [openwiki/index.md](openwiki/index.md) for the full repository wiki (archite
 
 1. Copy/clone this repo into the new project directory.
 2. Replace the root README: `mv README_TEMPLATE.md README.md`, then fill in TL;DR, TOC, Installation, Usage, etc.
-3. For each new service, copy `packages/pyproject.toml.example` to `packages/{package_name}/pyproject.toml` and populate `name`, `description`, and dependencies. Follow the `Code Structure` layout in `CLAUDE.md` for where `src/`, `tests/`, `docs/`, `evals/`, `notebooks/`, and `scripts/` go inside each package.
+3. For each new service, copy `packages/pyproject.toml.example` to `packages/{package_name}/pyproject.toml` and populate `name`, `description`, and dependencies. Follow the `Code Structure` layout in `CLAUDE.md` for where `src/`, `tests/`, `docs/`, `evals/`, `notebooks/`, and `scripts/` go inside each package. Also copy `packages/tach.toml.example` to `packages/{package_name}/tach.toml`, and run `uvx tach sync --add` from the package once it has real modules to keep boundaries in sync.
 4. Before starting a new feature or service, copy `docs/DESIGN_DOC_TEMPLATE.md` to `{FEATURE_NAME}.md` at the repo root and fill it in (see the `/designdoc-creator` skill).
 5. Copy `.env.example` to `.env` at the repo root, and to a `.env` inside each package that needs its own keys. Populate required keys (e.g. `GEMINI_API_KEY`, `OPENAI_API_KEY`) and never commit populated `.env` files.
 6. Cross-package utilities and Pydantic API models go in `packages/data-utils/` and `packages/data-models/` respectively — check there before adding something locally to a package.
@@ -23,6 +23,7 @@ This template pulls shared tooling from sibling repos instead of duplicating it 
 
 - **Logger** — [konrad-woj/logger](https://github.com/konrad-woj/logger): structured logging package. Each package depends on it via `[tool.uv.sources]` in its `pyproject.toml` (see `packages/pyproject.toml.example`); `packages/logger/` in this repo is a reference copy only, never fork/redefine it locally.
 - **Skills** — [konrad-woj/skillset](https://github.com/konrad-woj/skillset): shared Claude Code skills used across projects. Sync the skills you need into `.claude/skills/` manually rather than copy-pasting skill content into this repo; if a task needs a skill that doesn't exist yet, add it to the skillset repo instead of defining it locally here.
+- **Tach** — [gauge-sh/tach](https://github.com/gauge-sh/tach): enforces module boundaries within a package. Every package ships a `tach.toml` (see `packages/tach.toml.example`) and a `tach` taskipy task; `uv run task precommits` runs `tach check` alongside ruff and pyright.
 
 ## Repo-wide scripts
 
