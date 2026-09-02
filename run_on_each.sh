@@ -1,26 +1,40 @@
-# Example usage: ./run_on_each.sh "uv sync"         # continues on error
-#                ./run_on_each.sh -b "uv sync"      # break on error
+#!/bin/sh
+# Runs a command inside every packages/*/ directory.
+#
+# Example usage: sh run_on_each.sh "uv sync"                  # continue past failures
+#                sh run_on_each.sh -b "uv run task precommits"  # stop at first failure
+#
+# Exits non-zero if the command failed in any package, so it is usable as a CI gate.
 
-# Check if the -b flag is present
 BREAK_ON_ERROR=0
 if [ "$1" = "-b" ]; then
   BREAK_ON_ERROR=1
   shift
 fi
 
-# Check if a command is provided
 if [ -z "$1" ]; then
-  echo "Usage: $0 [-b] <command>"
-  exit 1
+  echo "Usage: $0 [-b] <command>" >&2
+  exit 2
 fi
 
+COMMAND="$1"
+FAILED=""
+
 for dir in ./packages/*/; do
-  if [ -d "$dir" ]; then
-    echo "Running '$1' in $dir"
-    if [ "$BREAK_ON_ERROR" -eq 1 ]; then
-      (cd "$dir" && $1) || break
-    else
-      (cd "$dir" && $1) || echo "Command failed in $dir, continuing..."
-    fi
+  [ -d "$dir" ] || continue
+  echo "Running '$COMMAND' in $dir"
+  if (cd "$dir" && sh -c "$COMMAND"); then
+    continue
   fi
+  FAILED="$FAILED $dir"
+  if [ "$BREAK_ON_ERROR" -eq 1 ]; then
+    echo "Command failed in $dir, stopping." >&2
+    break
+  fi
+  echo "Command failed in $dir, continuing..." >&2
 done
+
+if [ -n "$FAILED" ]; then
+  echo "FAILED in:$FAILED" >&2
+  exit 1
+fi
