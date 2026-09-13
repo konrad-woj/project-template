@@ -1,59 +1,60 @@
 # Project Template
 
-Template repo for Python AI/ML microservices and POCs (FastAPI + `uv` monorepo). Use it to bootstrap a new project, then delete this section and fill in `README_TEMPLATE.md` (renamed to `README.md`) with the project's own docs.
+Template repo for Python AI/ML microservices and POCs (FastAPI + `uv` monorepo).
+See [CLAUDE.md](CLAUDE.md) for the full engineering conventions, and
+[openwiki/index.md](openwiki/index.md) for the generated repository wiki.
 
-## 📚 Documentation
+## Quick start — bootstrap your own repo
 
-See [openwiki/index.md](openwiki/index.md) for the full repository wiki (architecture, design, operations, and per-package docs), kept up to date by OpenWiki. See `CLAUDE.md` for the full engineering conventions this template enforces.
+1. Copy/clone this repo into your new project directory, point `origin` at
+   your new remote, and reset history if this is a fresh project.
+2. `mv README_TEMPLATE.md README.md`, then fill in TL;DR, TOC, Installation,
+   Usage, etc.
+3. Rename the project in `package.json` (`"name"`), and update the
+   `description` field in any `packages/*/pyproject.toml` that still says
+   "template".
+4. Decide what to do with the reference packages:
+   - `packages/data-utils/` — keep; generic cross-package helpers.
+   - `packages/example-library/` and `packages/example-service/` — copy their
+     shape for your first real packages (a plain library and a runnable
+     FastAPI service, wired to each other and to the shared `logger`
+     dependency), then delete them once you no longer need the example.
+5. For each new service: copy `packages/pyproject.toml.example` to
+   `packages/{package_name}/pyproject.toml` (fill in `name`, `description`,
+   dependencies) and `packages/tach.toml.example` to
+   `packages/{package_name}/tach.toml`. Follow the `Code Structure` layout in
+   `CLAUDE.md` for where `src/`, `tests/`, `docs/`, `evals/`, `notebooks/`, and
+   `scripts/` go. Run `uv run tach sync --add` once the package has real
+   modules.
+6. Copy `Dockerfile.example` to `Dockerfile.{package_name}` for each
+   deployable service and replace the `{package_name}` / `{package_module}`
+   placeholders.
+7. Copy `.env.example` to `.env` at the repo root (and to a `.env` inside any
+   package that needs its own keys), and populate the required keys. Never
+   commit a populated `.env`.
+8. Run `sh sync_skills.sh` to vendor the Claude Code skills you need from
+   [konrad-woj/skillset](https://github.com/konrad-woj/skillset) into the
+   gitignored `.claude/skills/`.
+9. Run `npx openwiki --init` to regenerate `openwiki/` for the new project,
+   and review the output before committing it.
+10. Before starting a new feature, copy `docs/DESIGN_DOC_TEMPLATE.md` to
+    `{FEATURE_NAME}.md` at the repo root (see the `/designdoc-creator` skill).
+11. Verify the whole repo before the first commit:
 
-## Bootstrapping a new project from this template
+    ```bash
+    sh run_on_each.sh -b "uv sync --all-groups"
+    sh run_on_each.sh -b "uv run task ci"
+    ```
 
-1. Copy/clone this repo into the new project directory.
-2. Replace the root README: `mv README_TEMPLATE.md README.md`, then fill in TL;DR, TOC, Installation, Usage, etc.
-3. For each new service, copy `packages/pyproject.toml.example` to `packages/{package_name}/pyproject.toml` and populate `name`, `description`, and dependencies. Follow the `Code Structure` layout in `CLAUDE.md` for where `src/`, `tests/`, `docs/`, `evals/`, `notebooks/`, and `scripts/` go inside each package. Also copy `packages/tach.toml.example` to `packages/{package_name}/tach.toml`, and run `uvx tach sync --add` from the package once it has real modules to keep boundaries in sync.
-4. Before starting a new feature or service, copy `docs/DESIGN_DOC_TEMPLATE.md` to `{FEATURE_NAME}.md` at the repo root and fill it in (see the `/designdoc-creator` skill).
-5. Copy `.env.example` to `.env` at the repo root, and to a `.env` inside each package that needs its own keys. Populate required keys (e.g. `GEMINI_API_KEY`, `OPENAI_API_KEY`) and never commit populated `.env` files.
-6. Cross-package utilities and Pydantic API models go in `packages/data-utils/` and `packages/data-models/` respectively — check there before adding something locally to a package.
-7. Sync the Claude Code skills you need from [konrad-woj/skillset](https://github.com/konrad-woj/skillset) into `.claude/skills/` — don't copy-paste skill content into this repo.
-8. Run `npx openwiki --init` once to generate `openwiki/`, and review the output before committing it.
+## What's already set up
 
-## Reusable Dependencies
-
-This template pulls shared tooling from sibling repos instead of duplicating it locally:
-
-- **Logger** — [konrad-woj/logger](https://github.com/konrad-woj/logger): structured logging package. Each package depends on it via `[tool.uv.sources]` in its `pyproject.toml` (see `packages/pyproject.toml.example`); `packages/logger/` in this repo is a reference copy only, never fork/redefine it locally.
-- **Skills** — [konrad-woj/skillset](https://github.com/konrad-woj/skillset): shared Claude Code skills used across projects. Sync the skills you need into `.claude/skills/` manually rather than copy-pasting skill content into this repo; if a task needs a skill that doesn't exist yet, add it to the skillset repo instead of defining it locally here.
-- **Tach** — [gauge-sh/tach](https://github.com/gauge-sh/tach): enforces module boundaries within a package. Every package ships a `tach.toml` (see `packages/tach.toml.example`) and a `tach` taskipy task; `uv run task precommits` runs `tach check` alongside ruff and pyright.
-
-## Repo-wide scripts
-
-- `sh run_on_each.sh "uv sync"` runs a command inside every `packages/*/` directory, continuing past failures. Pass `-b` to stop at the first failure instead: `sh run_on_each.sh -b "uv run task precommits"`.
-
-## OpenWiki
-
-Generates and maintains the repo wiki under `openwiki/` (see `openwiki/quickstart.md` and `openwiki/INSTRUCTIONS.md` for scope):
-
-```
-npx openwiki --init                  # one-time setup
-npx openwiki                         # interactive doc chat over the current repo
-npx openwiki code --update --print   # manual local doc refresh
-```
-
-Defaults to Gemini (`GEMINI_API_KEY`, `OPENWIKI_PROVIDER`/`OPENWIKI_MODEL_ID` in `.env`); CI (`.github/workflows/openwiki-update.yml`) runs the same way since GitHub-hosted runners can't reach a local model server. For fully local/offline use, uncomment the OpenAI-compatible block in `.env.example` instead. Don't hand-edit the generated pages — update source code/docs and let OpenWiki regenerate.
-
-## Running Claude Code in a sandbox
-
-This template ships a reference `sandbox-exec` profile, `claude-sandbox.sb`, that restricts Claude Code's file access on macOS: it denies read/write on credential and secret locations (SSH keys, cloud CLI configs, `.env` files, keychains, shell history, etc.) while leaving the rest of the filesystem at its default permissions.
-
-To use it:
-
-1. Copy the profile out of the repo to a stable path, e.g. `cp claude-sandbox.sb ~/claude-sandbox.sb`, and edit the hardcoded home-directory paths inside it to match your username.
-2. Add an alias to your shell rc file (`~/.zshrc` or `~/.bashrc`):
-   ```
-   alias claude="sandbox-exec -f ~/claude-sandbox.sb claude"
-   ```
-3. Reload the shell: `source ~/.zshrc`.
-4. Review and extend the deny lists in `claude-sandbox.sb` as you add new credential locations (password managers, cloud CLIs, etc.) to your machine.
-
-`~/.gitconfig` is read-allowed (git reads it on every invocation) but write-denied, so git works normally under the sandboxed alias while a run can't tamper with it (e.g. planting a malicious `credential.helper` or `url.insteadOf`). A profile change only takes effect in a new shell/`claude` session — reload after editing `claude-sandbox.sb`.
-
+| Area | Details |
+| --- | --- |
+| Packages | `packages/data-utils/` (cross-package helpers), `packages/example-library/` + `packages/example-service/` (reference library/service pair) |
+| Logger | Every package that logs depends on [konrad-woj/logger](https://github.com/konrad-woj/logger) via `[tool.uv.sources]` — see `packages/example-service` for a working `configure_logging()` / `get_logger(__name__)` example |
+| Module boundaries | [gauge-sh/tach](https://github.com/gauge-sh/tach) — every package ships a `tach.toml`, checked by `uv run task tach` / `precommits` / `ci` |
+| Quality gate | `uv run task test` / `precommits` / `ci` inside any package directory; `.github/workflows/ci.yml` auto-discovers every package |
+| Repo-wide scripts | `sh run_on_each.sh [-b] "<cmd>"` runs `<cmd>` in every `packages/*/`; `sh sync_skills.sh [skill ...]` vendors shared skills |
+| OpenWiki | `npx openwiki --init` / `npx openwiki` / `npx openwiki code --update --print` — see `openwiki/quickstart.md`; don't hand-edit generated pages |
+| Claude Code config | `.claude/settings.json` (committed, shared permissions) vs. `.claude/settings.local.json` / `.claude/skills/` (gitignored) |
+| Sandbox profile | `claude-sandbox.sb` — reference `sandbox-exec` profile denying access to credential/secret locations; setup instructions are in the file's own header comment |

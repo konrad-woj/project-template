@@ -57,10 +57,10 @@ Working with a senior engineer focused on Python AI/ML microservices and POCs fo
 - Python 3.13 for all code unless already declared in the project.
 - UV for environment management. Use `uv add <package>` instead of pip, `uv run python -m <module>` instead of python.
 - Pytest for testing. Use `tests/` directory. Run via `uv run pytest`.
-- Pydantic for data validation. Put models in `models.py` or `schemas.py` as appropriate. For API contracts (input/output messages), use `from data_models.models import BaseSchema` (from `../data-models`) instead of Pydantic's `BaseModel`.
+- Pydantic for data validation. Put models in `models.py` or `schemas.py` as appropriate.
 - FastAPI for web services. Organize routers under `routers/`, models in `models.py`, keep `main.py` as entrypoint only.
 - Use dataclasses for simple configs, Hydra for multi-environment or composable configs. Never use JSON or ENV vars for complex configuration other than FastAPI settings.
-- Tach for enforcing module boundaries within a package. Every package ships a `tach.toml`; run `uv run task tach` (or `uvx tach check`) to validate, and `uvx tach sync --add` to update it after adding or moving modules.
+- Tach for enforcing module boundaries within a package. Every package ships a `tach.toml`; run `uv run task tach` to validate, and `uv run tach sync --add` to update it after adding or moving modules.
 
 ## Best Practices
 
@@ -71,34 +71,42 @@ Working with a senior engineer focused on Python AI/ML microservices and POCs fo
 ## New Project Setup
 
 - Copy `packages/pyproject.toml.example` to `packages/{package_name}/pyproject.toml` and populate `name`, `description`, and dependencies.
-- Copy `packages/tach.toml.example` to `packages/{package_name}/tach.toml`, then run `uvx tach sync --add` from within the package once its modules take shape to keep boundaries in sync.
+- Copy `packages/tach.toml.example` to `packages/{package_name}/tach.toml`, then run `uv run tach sync --add` from within the package once its modules take shape to keep boundaries in sync.
 - Copy `docs/DESIGN_DOC_TEMPLATE.md` to `MY_NEW_DESIGN_NAME.md` at the repo root and fill it in before starting a new feature or service (see `/designdoc-creator` skill).
 - Copy `.env.example` to `.env` (repo root) and per-package `.env` files, and populate required keys (e.g. `GEMINI_API_KEY`, `OPENAI_API_KEY`). Never commit populated `.env` files.
 
 ## Bash Commands
 
 Package level (run from `packages/{package_name}`):
-```
+
+```bash
+uv sync --all-groups
 uv run python <path_to_file>
 uv run python -m <module>
-uv run pytest tests/
-uv run task precommits
+uv run pytest tests/unit
+uv run task test             # unit tests
+uv run task precommits       # format + lint + typecheck + boundaries (mutates files)
+uv run task ci               # same gate, non-mutating - what CI runs
 ```
 
 Repo level:
-```
+
+```bash
 sh run_on_each.sh -b "uv run task precommits"
+sh run_on_each.sh -b "uv run task ci"
 sh run_on_each.sh -b "uv lock"
+sh sync_skills.sh                    # vendor shared skills into .claude/skills/
 docker build -f Dockerfile.{package_name} -t {image_name} .
 npx openwiki --init          # one-time setup of repo docs; review output before committing
 npx openwiki                 # interactive doc chat over the current repo
 npx openwiki code --update --print   # manual local doc refresh
 ```
+
 Note: openwiki commands default to Gemini (see .env.example); CI (.github/workflows/openwiki-update.yml) also uses Gemini since GitHub-hosted runners can't reach a local model server. For fully local/offline use, uncomment the openai-compatible block in .env.example instead.
 
 ## Code Structure
 
-```
+```text
 {repo_root}/
   packages/
     {package-name}/
@@ -123,32 +131,40 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
         __init__.py
         {script_name}.py
     data-utils/  # cross-package utilities, e.g., for data processing, I/O, validation, etc.
+      tach.toml
       src/data_utils/
         __init__.py
-        {util_name}.py
-    data-models/  # cross-package pydantic models, e.g., for API contracts, data validation, etc.
+        env.py
+        jsonl.py
+    example-library/  # reference example of a plain importable library package
       tach.toml
-      src/data_models/
+      src/example_library/
         __init__.py
+        greetings.py
+    example-service/  # reference example of a runnable FastAPI service package, depends on example-library via [tool.uv.sources] path
+      tach.toml
+      src/example_service/
+        main.py
         models.py
-    logger/  # reference copy only - real dependency comes from the shared git repo via [tool.uv.sources], do not fork/redefine per project
-      tach.toml
-      src/logger/
-        __init__.py
-        logger.py
-        timer.py
-        async_timer.py
+        routers/
+          greeting.py
+  packages/pyproject.toml.example  # template - copy into a new package dir, don't edit in place
+  packages/tach.toml.example  # template - copy into a new package dir as tach.toml, don't edit in place
   Dockerfile.{package_name}  # Dockerfiles for each package, located in the repo root as they use multiple packages
+  Dockerfile.example  # template - copy to Dockerfile.{package_name}, don't edit in place
+  .dockerignore  # shared build-context excludes for every Dockerfile.{package_name}
   run_on_each.sh  # helper script to run commands in all packages, e.g., sh run_on_each.sh -b "uv run task precommits"
+  sync_skills.sh  # vendors shared skills from the skillset repo into .claude/skills/
   CLAUDE.md  # project instructions for Claude
   AGENTS.md  # written/maintained by OpenWiki (managed <!-- OPENWIKI:START/END --> block); do not hand-edit that block
   MY_NEW_DESIGN_NAME.md  # per-feature design doc, copied from docs/DESIGN_DOC_TEMPLATE.md
   docs/DESIGN_DOC_TEMPLATE.md  # template - copy, don't edit in place
-  pyproject.toml.example  # template - copy into a new package dir, don't edit in place
-  tach.toml.example  # template - copy into a new package dir as tach.toml, don't edit in place
   package.json, package-lock.json  # pins the openwiki npm devDependency version; run via npx, not global install
   openwiki/  # OpenWiki-generated repo docs; openwiki/INSTRUCTIONS.md scopes what it should/shouldn't document
+  .claude/settings.json  # shared permissions, committed; settings.local.json and skills/ are gitignored
+  .github/workflows/ci.yml  # per-package quality gate (uv run task ci) on every PR and push to main
   .github/workflows/openwiki-update.yml  # on-demand (workflow_dispatch) CI job that auto-PRs OpenWiki doc updates
+  .markdownlint.json  # shared Markdown rules; packages reference it as ../../.markdownlint.json
   .env.example  # template listing required env var names, keep in sync with actual usage
   .env  # local env file, never commit populated .env files
   .gitignore  # ignore .env, .venv, __pycache__, node_modules, etc.
@@ -156,8 +172,8 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
 
 ## Skills
 
-- Skills live in the `skillset` repo (https://github.com/konrad-woj/skillset) and are shared across projects - do not redefine project-local skills that already exist there.
-- Sync/fetch skills from that repo into `.claude/skills/` (e.g. `git submodule` or a sync script) rather than copy-pasting skill content into this repo.
+- Skills live in the [`skillset` repo](https://github.com/konrad-woj/skillset) and are shared across projects - do not redefine project-local skills that already exist there.
+- Run `sh sync_skills.sh` to vendor them into `.claude/skills/` (gitignored) rather than copy-pasting skill content into this repo. `sh sync_skills.sh feature-coder code-reviewer` syncs a subset.
 - If a task needs a skill that doesn't exist yet, add it to the `skillset` repo, not as a one-off local skill, unless it is genuinely project-specific.
 - When working on a new feature or refactoring, use the `/feature-coder` skill (plan mode).
 
@@ -166,15 +182,13 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
 - All Dockerfiles are located in `{repo_root}` as they use multiple packages.
 - Always use uv by going into the package dir (`{repo_root}/packages/{package_name}`) and running uv commands from there - this ensures that the correct environment is used.
 - Inside the package dir you must always:
-  - Use `uv run task precommits` when you're done making a series of code changes. This will run ruff checks, pyright typechecks, and tach module boundary checks. If found pyright errors are not important, ignore them specifically for particular lines of code. When a change adds or moves modules, run `uvx tach sync --add` in the package before committing so `tach.toml` reflects the real dependency graph.
+  - Use `uv run task precommits` when you're done making a series of code changes. This will run ruff checks, pyright typechecks, tach module boundary checks, and markdownlint. If found pyright errors are not important, ignore them specifically for particular lines of code. When a change adds or moves modules, run `uv run tach sync --add` in the package before committing so `tach.toml` reflects the real dependency graph.
   - Put unit tests in `./tests/unit` and run with `uv run pytest tests/unit`.
   - Put integration tests in `./tests/integration` and run with `uv run pytest tests/integration`.
   - Focus tests on critical logic, edge cases, and integration points - skip tests that add little value or are already covered by Pydantic validation.
   - Put all generated `.md` files in `./docs`, updating existing ones. Keep docs concise, reference the code, and add example usages - avoid repetitions, rationale, and estimates.
-  - Never redefine the `logger` package locally - depend on it via `[tool.uv.sources]` pointing at the shared git repo (see `packages/pyproject.toml.example`), configure it with `configure_logger("INFO")` once in the executable entrypoint, and create it with `logger = structlog.get_logger()` when needed.
-  - For execution timing use the `timer` or `async_timer` decorators from the `logger` package.
+  - Never fork/redefine the `logger` package locally - depend on it via `[tool.uv.sources]` pointing at the shared git repo (see `packages/pyproject.toml.example`, or `packages/example-service` for a working reference), call `configure_logging()` once in the executable entrypoint, and create a logger with `get_logger(__name__)` in each module that needs one.
   - Generic, cross-package utilities are located in `../data-utils` - check it before implementing new utilities locally.
-  - Generic, cross-package pydantic models are located in `../data-models` - check it before implementing new models locally.
   - Use environment variables from `.env` if present, keeping `.env.example` up to date whenever a new variable is introduced.
 
 <!-- OPENWIKI:START -->

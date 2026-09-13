@@ -7,13 +7,13 @@ engineer needs to orient themselves — not a restatement of every file.
 ## Document
 
 - `packages/*/src/**` — architecture, module responsibilities, how packages relate
-  to each other (e.g. how a package depends on `data-models`, `data-utils`, or the
-  shared `logger` package via `[tool.uv.sources]`).
+  to each other (e.g. how a package depends on `data-utils` or the shared
+  `logger` package via `[tool.uv.sources]`).
 - `packages/*/docs/*.md` and each package's `README.md` — treat these as the
   source of truth for that package's intent; summarize and link to them rather than
   duplicating their content.
-- Public API surfaces: FastAPI routes/handlers, Pydantic/`data_models` schemas used
-  as request/response contracts.
+- Public API surfaces: FastAPI routes/handlers, Pydantic schemas used as
+  request/response contracts.
 - Root-level design docs (files matching `*_DESIGN*.md` / copied from
   `DESIGN_DOC_TEMPLATE.md`) and the root `README.md`.
 - `run_on_each.sh` and `Dockerfile.{package_name}` — how packages are built/run

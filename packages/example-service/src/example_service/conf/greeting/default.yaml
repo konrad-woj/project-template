@@ -1,0 +1,3 @@
+# template: null defers to example_library.build_greeting's default template
+template: null
+max_name_length: 100
