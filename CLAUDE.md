@@ -42,6 +42,7 @@ Working with a senior engineer focused on Python AI/ML microservices and POCs fo
 - For refactors: change only what was asked. Don't clean up surrounding code unprompted.
 - For features: create a phased `PLAN.md` before implementing. Use the `/feature-coder` skill.
 - For review: use the `/code-reviewer` skill.
+- For over-engineering audits: use the `/ponytail-review` (diff) or `/ponytail-audit` (whole repo) skill.
 - When blocked by a hook or permission: investigate and fix the underlying issue rather than bypassing it.
 - If you discover unexpected state (unfamiliar files, branches, config): investigate before deleting or overwriting.
 
