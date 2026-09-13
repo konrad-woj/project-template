@@ -58,3 +58,4 @@ See [CLAUDE.md](CLAUDE.md) for the full engineering conventions, and
 | OpenWiki | `npx openwiki --init` / `npx openwiki` / `npx openwiki code --update --print` — see `openwiki/quickstart.md`; don't hand-edit generated pages |
 | Claude Code config | `.claude/settings.json` (committed, shared permissions) vs. `.claude/settings.local.json` / `.claude/skills/` (gitignored) |
 | Sandbox profile | `claude-sandbox.sb` — reference `sandbox-exec` profile denying access to credential/secret locations; setup instructions are in the file's own header comment |
+| Over-engineering audits | [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) Claude Code plugin — `/ponytail-review` on a diff, `/ponytail-audit` on the whole repo |
