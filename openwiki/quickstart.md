@@ -17,7 +17,7 @@ This repository is a Python monorepo template managed with `uv` for dependency m
 
 The repository follows a standard structure:
 
-*   `/packages/`: Contains individual Python packages (e.g., `data-models`, `logger`).
+*   `/packages/`: Contains individual Python packages (e.g., `data-utils`, `example-service`).
 *   `/docs/`: Root-level documentation and design templates.
 *   `/openwiki/`: OpenWiki-generated documentation (this wiki).
 *   `/run_on_each.sh`: A utility script to execute commands across all packages.

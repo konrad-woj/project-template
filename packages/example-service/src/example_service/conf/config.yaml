@@ -1,0 +1,3 @@
+defaults:
+  - greeting: default
+  - _self_

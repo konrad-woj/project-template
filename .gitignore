@@ -56,7 +56,10 @@ logs/
 
 # Jupyter
 .ipynb_checkpoints/
+# Exploratory notebooks are committed under packages/*/notebooks/; stray
+# notebooks anywhere else are scratch and stay untracked.
 *.ipynb
+!packages/*/notebooks/*.ipynb
 
 # Docs generated
 docs/_build/
@@ -67,8 +70,14 @@ docs/_build/
 *.csv
 *.jsonl
 results/
+# Small fixtures checked in alongside tests are exempt from the rules above.
+!**/tests/**/fixtures/**
 
 # Claude
-.claude/
-CLAUDE.md
+# .claude/settings.json and CLAUDE.md are shared project config and must stay
+# tracked. Per-machine overrides are ignored, and .claude/skills/ is vendored
+# from the skillset repo by sync_skills.sh rather than committed here.
+.claude/settings.local.json
+.claude/*.local.json
+.claude/skills/
 CLAUDE.local.md

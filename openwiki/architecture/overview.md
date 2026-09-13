@@ -18,21 +18,20 @@ This monorepo is designed to host multiple Python packages, enabling modular dev
 
 Packages within the monorepo often depend on each other or on external shared components:
 
-*   **`data-models`**: This package (`/packages/data-models`) is a foundational dependency, providing shared Pydantic models for API contracts and data validation. Other packages consume these models to ensure consistent data structures.
-*   **`logger`**: The `logger` package (`/packages/logger`) provides a standardized structured logging interface. While a local copy exists for reference, the canonical dependency for `logger` (and potentially other shared utilities like `data-utils` if it were present) is managed via `[tool.uv.sources]` from a shared Git repository. This ensures all projects use the same, centrally maintained logging solution.
+*   **`logger`**: Not a package in this repo — every package that logs depends on [konrad-woj/logger](https://github.com/konrad-woj/logger) directly via a `[tool.uv.sources]` Git entry in its `pyproject.toml`. This ensures all projects use the same, centrally maintained logging solution.
     *   **Source of Truth**: `CLAUDE.md` outlines this approach for shared dependencies.
+*   **`example-library` / `example-service`**: Reference pair showing both dependency styles: `example-service` (`/packages/example-service`) is a runnable FastAPI service that depends on `example-library` (`/packages/example-library`) via a local `[tool.uv.sources]` path entry, and on `logger` via the Git entry above. Both call `get_logger(__name__)`; only `example-service`, the entrypoint, calls `configure_logging()`.
 
 ### Diagram: Simplified Package Dependencies
 
 ```mermaid
 graph TD
-    A[Application/Service Package] --> B[data-models]
-    A --> C[logger]
-    B --> D[Pydantic]
+    A[Application/Service Package] --> C[logger]
     C --> E[structlog]
     subgraph Shared External Dependencies
         C -- from [tool.uv.sources] --> F[Canonical Logger Repo]
     end
+    G[example-service] -- from [tool.uv.sources] path --> H[example-library]
 ```
 
 ## `pyproject.toml` and `uv` Configuration

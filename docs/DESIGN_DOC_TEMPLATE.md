@@ -49,7 +49,7 @@ sequenceDiagram
 
 ### Evaluation Metrics *(delete if this revision doesn't change what/how success is measured)*
 
-> How the change will be evaluated, including metrics, thresholds, and evaluation datasets. 
+> How the change will be evaluated, including metrics, thresholds, and evaluation datasets.
 
 ### Data Model *(delete if unchanged)*
 
@@ -73,9 +73,9 @@ sequenceDiagram
 
 ### Phased Scope *(delete if this revision doesn't shift the roadmap)*
 
-**Phase 1**
+#### Phase 1
 
-**Phase 2**
+#### Phase 2
 
 ### Testing
 
@@ -87,7 +87,7 @@ sequenceDiagram
 
 ## Risks
 
-> Potential pitfalls and mitigation strategies. 
+> Potential pitfalls and mitigation strategies.
 
 ## Dependencies
 

@@ -1,0 +1,17 @@
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
+**/.pyright/
+**/tests/
+**/notebooks/
+**/evals/
+**/*.ipynb
+.git/
+.github/
+node_modules/
+openwiki/
+**/.env
+**/.env.*
+!**/.env.example
