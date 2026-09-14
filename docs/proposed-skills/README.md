@@ -8,6 +8,4 @@ Skills are shared across projects and are never defined project-locally
 gitignored, so a skill drafted here is moved to `skillset` and then arrives back
 through the sync — it is not loaded from this directory.
 
-| Skill | Status |
-| ----- | ------ |
-| `project-bootstrapper/` | Drafted, awaiting move to `skillset` |
+None currently staged.
