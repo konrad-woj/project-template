@@ -6,6 +6,11 @@ See [CLAUDE.md](CLAUDE.md) for the full engineering conventions, and
 
 ## Quick start — bootstrap your own repo
 
+The steps below can be automated by the `project-bootstrapper` skill (drafted
+in `docs/proposed-skills/project-bootstrapper/`, awaiting move to
+[skillset](https://github.com/konrad-woj/skillset) — not yet available via
+`sync_skills.sh`).
+
 1. Copy/clone this repo into your new project directory, point `origin` at
    your new remote, and reset history if this is a fresh project.
 2. `mv README_TEMPLATE.md README.md`, then fill in TL;DR, TOC, Installation,
