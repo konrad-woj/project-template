@@ -93,6 +93,7 @@ uv run task ci               # same gate, non-mutating - what CI runs
 Repo level:
 
 ```bash
+sh bootstrap.sh <project-name>       # one-time: rename README/package.json for a new project
 sh run_on_each.sh -b "uv run task precommits"
 sh run_on_each.sh -b "uv run task ci"
 sh run_on_each.sh -b "uv lock"
@@ -151,6 +152,7 @@ Note: openwiki commands default to Gemini (see .env.example); CI (.github/workfl
           greeting.py
   packages/pyproject.toml.example  # template - copy into a new package dir, don't edit in place
   packages/tach.toml.example  # template - copy into a new package dir as tach.toml, don't edit in place
+  bootstrap.sh  # renames README_TEMPLATE.md -> README.md and sets package.json's name for a new project
   Dockerfile.{package_name}  # Dockerfiles for each package, located in the repo root as they use multiple packages
   Dockerfile.example  # template - copy to Dockerfile.{package_name}, don't edit in place
   .dockerignore  # shared build-context excludes for every Dockerfile.{package_name}
